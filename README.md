@@ -9,7 +9,7 @@ subshader 类似 direct X 中的techniques 一样，在多pass种找到最合适
 1 subshader 和 pass 不区分大小写，但是为了规范还是写成SubShader 和 Pass
 测试发现SV_POSITION 和 SV_Target 大小写也不影响。
 2. pass 写几个就会执行几次，如之前错误的在一个pass后面又写了一个pass，导致材质球最后是白的。
-
+![images](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/chapter5-1.png）
 
 
 3.如果定义v2f的话，vert shader 不用加一个SV_POSITION语义了，DX10新出的（可以考虑输出的是一个v2f 自定义的数据结构，而自定义的数据结构内部已经定义好了语义）
