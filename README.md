@@ -84,22 +84,25 @@ https://zhuanlan.zhihu.com/p/152561125 .
 4. specular 计算 **viewDir** 。 viewDir =\_WorldSpaceCameraPos.xyz - i.vertexWord (对于vs/ps来说，各个处理单位有自己独立的一个视角方向 **顶点的方向到相机的方向**) 。这个之前忽略的一点。 
 
 **光照模型简单概括下（不考虑能量衰减和brdf反射模型）：**  
-　　color = ambient + **diffuse** + **specular**  
-  a. 其中ambient 直接取环境中最亮的环境光即可。
-  b. **diffuse** 有两种常用的计算模型。  
-      **一种为通用的简单lambert 模型 : diffuse = lightColor * \_Diffuse.xyz * saturate( dot(normal , lightViewDir))**   视角无关， 光线、法线有关，各向同性。
-      **另一种是半条命的half lamber模型。所以会比较亮 。 diffuse = （ lightColor * \_Diffuse.xyz ）* （0.5* dot(normal,lightViewDir) + 0.5)**,会比较亮，各向同性 ，0.5是通常参数。  
+Color = ambient + **diffuse** + **specular**   
+
+a. 其中ambient 直接取环境中最亮的环境光即可。  
+b. **diffuse** 有两种常用的计算模型。  
+**一种为通用的简单lambert 模型 : diffuse = lightColor * \_Diffuse.xyz * saturate( dot(normal , lightViewDir))**   视角无关， 光线、法线有关，各向同性。  
+**另一种是半条命的half lamber模型。所以会比较亮 。 diffuse = （ lightColor * \_Diffuse.xyz ）* （0.5* dot(normal,lightViewDir) + 0.5)**,会比较亮，各向同性 ，0.5是通常参数。  
   
-  c. **specular** 通常也有两种计算模型。
-     1 **phong光照模型**   
-       . 需要计算反射方向 和 视角方向。  
-           反射方向：reflectDir = reflect( **-lightDir** , **normal**)
-           视角方向：specular   = lightColor * \_Specular.xyz * pow ( max( 0 , dot( **viewDir** , **reflectionDir** ))  , \_Gloss ) 
-     
-     **blinn-phong** 光照模型：简化了反射方向。
-         先计算了 half = normalize( viewDir + lightDir ) //省了一个reflect函数 
-         然后在计算 specular = lightColor * \_Specular.xyz * pow(max(0, dot( half, normal )) , _Gloss ) 
-         
+c. **specular** 通常也有两种计算模型。
+1 **phong光照模型**   
+需要计算反射方向 和 视角方向.  
+反射方向：reflectDir = reflect( **-lightDir** , **normal**)  
+视角方向：specular   = lightColor * \_Specular.xyz * pow ( max( 0 , dot( **viewDir** , **reflectionDir** ))  , \_Gloss ) 
+  
+  
+ **blinn-phong** 光照模型：简化了反射方向。  
+ 先计算了 half = normalize( viewDir + lightDir ) //省了一个reflect函数   
+ 然后在计算 specular = lightColor * \_Specular.xyz * pow(max(0, dot( half, normal )) , \_Gloss ) 
+ 
+ 
           
 
 
