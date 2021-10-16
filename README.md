@@ -31,7 +31,7 @@ subshader 类似 direct X 中的 techniques 一样，在多pass种找到最合�
 
 
 ### 3.如果定义v2f的话，vert shader 不用加一个SV_POSITION语义了，DX10新出的（因为函数返回值是个v2f自定义的数据结构，而该数据结构内部已定义好语义）
-
+<br/>
 https://stackoverflow.com/questions/58543318/invalid-output-semantic-sv-position-legal-indices-are-in-0-0
 
 ![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/chapter5-3.png)
@@ -76,11 +76,16 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
 ## 第六章（基础光照）
 <br/>
 1. color =  ambient + diffuse + specular + emission (自发光) ，最简单的光照公式，各向同性。  games 101/202 一些概念。 **但是通过什么保证这几个数相加小于等于1的呢  ？**  
-<br/>
-2. Tags标记，LightMode, 前向渲染有两个，ForwardBase  和 ForwardAdd。 两个标记分别unity的一个优化，ForwardBase 只有最亮的第一个光源ps执行，其他vs/SH球谐函数计算，然后在执行ForwardAdd的pass。（本质是在引擎上利用GPU特性做的一些简单优化 : 类似这篇defferd 和forward 的区别<br/>：http://download.nvidia.com/developer/presentations/2004/6800_Leagues/6800_Leagues_Deferred_Shading.pdf）  
+<br/>  
+  
+2. Tags标记，LightMode, 前向渲染有两个，ForwardBase  和 ForwardAdd。 两个标记分别unity的一个优化，ForwardBase 只有最亮的第一个光源ps执行，其他vs/SH球谐函数计算，然后在执行ForwardAdd的pass。<br/>（本质是在引擎上利用GPU特性做的一些简单优化 : 类似这篇defferd 和forward 的区别<br/>http://download.nvidia.com/developer/presentations/2004/6800_Leagues/6800_Leagues_Deferred_Shading.pdf  
+
+
 
 UnityLightingCommon.cginc 光照常量，如 \_lightColor0 ,\_WorldSpaceLightPos0 等常量宏
 
+  
+ 
 3. cg中的 **reflect(input,normal)函数** 。约定方向是以 **-**\_WorldSpaceLightPos0.xyz ，从光源方向看向原点的方向计算的。
 原理为（都转化到了世界空间，所以可以看成在坐标原点的计算）
 https://zhuanlan.zhihu.com/p/152561125 . 
@@ -88,15 +93,18 @@ https://zhuanlan.zhihu.com/p/152561125 .
 
 4. specular 计算 **viewDir** 。 viewDir =\_WorldSpaceCameraPos.xyz - i.vertexWord (对于vs/ps来说，各个处理单位有自己独立的一个视角方向 **顶点的方向到相机的方向**) 。这个之前忽略的一点。 
 
-**光照模型简单概括下（不考虑能量衰减和brdf反射模型）：**  
+
+### 光照模型简单概括下（不考虑能量衰减和brdf反射模型）： 
 <br/>
 Color = ambient + **diffuse** + **specular**   
 <br/>
 a. 其中ambient 直接取环境中最亮的环境光即可。  
-<br/>
+
 b. **diffuse** 有两种常用的计算模型。  
-  **一种为通用的简单lambert 模型 :** diffuse = lightColor \* \_Diffuse.xyz * saturate( dot(normal , lightViewDir))**   视角无关， 光线、法线有关，各向同性。  
-  **另一种是半条命的 half lamber模型。所以会比较亮** diffuse = （ lightColor * \_Diffuse.xyz ）* （0.5 \* dot(normal,lightViewDir) + 0.5) , 会比较亮，各向同性 ，0.5是通常参数。  
+    **一种为通用的简单lambert 模型 :**<br/> 
+        diffuse = lightColor \* \_Diffuse.xyz * saturate( dot(normal , lightViewDir))      视角无关， 光线、法线有关，各向同性。  
+    **另一种是半条命的 half lamber模型。所以会比较亮** 
+        diffuse = （ lightColor * \_Diffuse.xyz ）* （0.5 \* dot(normal,lightViewDir) + 0.5) ,   会比较亮，各向同性 ，0.5是通常参数。  
   
 c. **specular** 通常也有两种计算模型。<br/>
   1. **phong光照模型**   
