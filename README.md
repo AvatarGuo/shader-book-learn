@@ -92,15 +92,15 @@ b. **diffuse** 有两种常用的计算模型。
 **另一种是半条命的half lamber模型。所以会比较亮 。 diffuse = （ lightColor * \_Diffuse.xyz ）* （0.5* dot(normal,lightViewDir) + 0.5)**,会比较亮，各向同性 ，0.5是通常参数。  
   
 c. **specular** 通常也有两种计算模型。
-1 **phong光照模型**   
-需要计算反射方向 和 视角方向.  
-反射方向：reflectDir = reflect( **-lightDir** , **normal**)  
-视角方向：specular   = lightColor * \_Specular.xyz * pow ( max( 0 , dot( **viewDir** , **reflectionDir** ))  , \_Gloss ) 
+    1. **phong光照模型**   
+    需要计算反射方向 和 视角方向.  
+    反射方向：reflectDir = reflect( **-lightDir** , **normal**)  
+    视角方向：specular   = lightColor * \_Specular.xyz * pow ( max( 0 , dot( **viewDir** , **reflectionDir** ))  , \_Gloss ) 
   
   
- **blinn-phong** 光照模型：简化了反射方向。  
- 先计算了 half = normalize( viewDir + lightDir ) //省了一个reflect函数   
- 然后在计算 specular = lightColor * \_Specular.xyz * pow(max(0, dot( half, normal )) , \_Gloss ) 
+   2. **blinn-phong** 光照模型：简化了反射方向。**  
+    先计算了 half = normalize( viewDir + lightDir ) //省了一个reflect函数   
+    然后在计算 specular = lightColor * \_Specular.xyz * pow(max(0, dot( half, normal )) , \_Gloss ) 
  
  
           
