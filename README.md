@@ -75,8 +75,8 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
 
 ## 第六章（基础光照）
 <br/>
-1. color =  ambient + diffuse + specular + emission (自发光) ，最简单的光照公式，各向同性。  games 101/202 一些概念。 **但是通过什么保证这几个数相加小于等于1的呢  ？**  
-<br/>  
+1. color =  ambient + diffuse + specular + emission (自发光) ，最简单的光照公式，各向同性。  games 101/202 一些概念。 
+**但是通过什么保证这几个数相加小于等于1的呢 ？**
   
 2. Tags标记，LightMode, 前向渲染有两个，ForwardBase  和 ForwardAdd。 两个标记分别unity的一个优化，ForwardBase 只有最亮的第一个光源ps执行，其他vs/SH球谐函数计算，然后在执行ForwardAdd的pass。<br/>（本质是在引擎上利用GPU特性做的一些简单优化 : 类似这篇defferd 和forward 的区别<br/>http://download.nvidia.com/developer/presentations/2004/6800_Leagues/6800_Leagues_Deferred_Shading.pdf  
 
@@ -95,11 +95,8 @@ https://zhuanlan.zhihu.com/p/152561125 .
 
 
 ### 光照模型简单概括下（不考虑能量衰减和brdf反射模型）： 
-<br/>
 Color = ambient + **diffuse** + **specular**   
-<br/>
 a. 其中ambient 直接取环境中最亮的环境光即可。  
-
 b. **diffuse** 有两种常用的计算模型。  
     **一种为通用的简单lambert 模型 :**<br/> 
         diffuse = lightColor \* \_Diffuse.xyz * saturate( dot(normal , lightViewDir))      视角无关， 光线、法线有关，各向同性。  
