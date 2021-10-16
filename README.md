@@ -63,7 +63,11 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
 
 ### 6.调试部分和平台差异。
 a. 假色彩图像，每个值都除以2（具体的写法是x 0.5)然后在加0.5 就把值限制在了0-1之间了。**（这里可以认为 appdata传到vs里面的值都被限制到了0-1之间了，这样就都约束都限制在0-1了）**  
-b. opengl 和directX 一个左下角（0,0）一个右上角（0,0），unity 有个宏可以区分 UNITY_UV_AT_TOP 宏区分开  
-c. **tex2d函数采样**。**directx9/11** 只能在ps中用，不能在vs用，如果vs确实想采样图片，可以使用tex2dlod函数代替，需要开启#pragma target3.0 编译选项才可以 p116 ,
+b. opengl 和directX 一个左下角（0,0）一个右上角（0,0），unity 有个宏可以区分 UNITY_UV_AT_TOP 宏区分开 ，如果渲染到屏幕上： unity自身会做处理。
+渲染到rendertexture上，单张贴图：graphic.blit 无需考虑。   
+**多张贴图需要考虑这个问题**（mrt技术，即可以渲染多张贴图的技术）   
+
+c. **tex2d函数采样**。**directx9/11** 只能在ps中用，不能在vs用，如果vs确实想采样图片，可以使用tex2dlod函数代替，需要开启#pragma target3.0 编译选项才可以  **p116**。  
 d. 慎用if 等语句，gpu的设计情况有关系，GIbook 讲的也比较清晰。
 
+## 第六章（基础光照）
