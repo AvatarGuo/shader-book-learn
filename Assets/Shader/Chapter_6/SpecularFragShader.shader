@@ -60,10 +60,10 @@
 
 
             fixed4 _Diffuse;
-            
+
             fixed4 _Specular;
             float _Gloss;
-            
+
 
             fixed4 frag (v2f i) : SV_Target
             {
