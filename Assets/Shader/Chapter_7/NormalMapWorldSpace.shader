@@ -3,7 +3,7 @@
     Properties
     {
         _MainTex("Main Texture",2D) = "white" {}
-        _NormalMap("Normal Map",2D) = "bump" {} //bump unity 内置有优化
+        _NormalMap("Normal Map",2D) = "bump" {} //unity 要勾选才可以
         _BumpScale("Bump Scale",Float) = 1.0
 
         _Diffuse("Diffuse",color) = (1.0,1.0,1.0,1.0)
@@ -42,7 +42,7 @@
 
             struct v2f
             {
-                
+
                 float4 uv : TEXCOORD0;
 
                 float3 lightDir:TEXCOORD1;//lightdir
@@ -55,7 +55,7 @@
                 float4 vertex : SV_POSITION;
             };
 
-            //
+            //tangent to world  matrix : 对
             sampler2D _MainTex;
             float4 _MainTex_ST;
 

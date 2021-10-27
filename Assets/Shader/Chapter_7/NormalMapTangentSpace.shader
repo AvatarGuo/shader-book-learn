@@ -84,46 +84,17 @@ Shader "Unity Shader book/Chapter7/NormalMapTangetSpace"
                 o.uv.zw = v.texcoord.xy *  _BumpMap_ST.xy + _BumpMap_ST.zw;
 
                 //模型空间的计算
-                //注意：不在vs中进行归一化，因为会平均
+                //注意：不在vs中进行归一化，因为会平均,有x的值，有y的值，有z的值。
                 //！！ v.tangent.w 存储的是法线的方向，
                 fixed3 binormal   = cross( normalize( v.normal.xyz ) , normalize( v.tangent.xyz )  ) * v.tangent.w;  
                 fixed3x3 rotation = fixed3x3( v.tangent.xyz , binormal.xyz , v.normal.xyz ); //shader 入门精要 4.6.2 的坐标轴空间变换。
 
-                
+
                 o.lightDir = mul(rotation , ObjSpaceLightDir(v.position).xyz);
                 o.viewDir  = mul(rotation , ObjSpaceViewDir(v.position).xyz); //view dir做个划分
                 // o.normal   = mul(rotation,normal);//这里不需要在计算normal了，因为之后要计算了
                 return o;
             };
-
-
-//             fixed4 frag(v2f i) : SV_Target {
-// 				fixed3 tangentLightDir = normalize(i.lightDir);
-// 				fixed3 tangentViewDir = normalize(i.viewDir);
-
-// 				// Get the texel in the normal map
-// 				fixed4 packedNormal = tex2D(_BumpMap, i.uv.zw);
-// 				fixed3 tangentNormal;
-// 				// If the texture is not marked as "Normal map"
-// //				tangentNormal.xy = (packedNormal.xy * 2 - 1) * _BumpScale;
-// //				tangentNormal.z = sqrt(1.0 - saturate(dot(tangentNormal.xy, tangentNormal.xy)));
-
-// 				// Or mark the texture as "Normal map", and use the built-in funciton
-// 				tangentNormal = UnpackNormal(packedNormal);
-// 				tangentNormal.xy *= _BumpScale;
-// 				tangentNormal.z = sqrt(1.0 - saturate(dot(tangentNormal.xy, tangentNormal.xy)));
-
-// 				fixed3 albedo = tex2D(_MainTex, i.uv).rgb * _Diffuse.rgb;
-
-// 				fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz * albedo;
-
-// 				fixed3 diffuse = _LightColor0.rgb * albedo * max(0, dot(tangentNormal, tangentLightDir));
-
-// 				fixed3 halfDir = normalize(tangentLightDir + tangentViewDir);
-// 				fixed3 specular = _LightColor0.rgb * _Specular.rgb * pow(max(0, dot(tangentNormal, halfDir)), _Gloss);
-
-// 				return fixed4(ambient + diffuse + specular, 1.0);
-// 			}
 
 
             fixed4 frag(v2f i) : SV_Target {
