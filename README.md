@@ -73,46 +73,60 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
   c. **tex2d函数采样**。**directx9/11** 只能在ps中用，不能在vs用，如果vs确实想采样图片，可以使用tex2dlod函数代替，需要开启#pragma target3.0 编译选项才可以  **p116**。  
   d. 慎用if 等语句，gpu的设计情况有关系，GI book 讲的也比较清晰。
 
+
+
 ## 第六章（基础光照）
-<br/>
-1. color =  ambient + diffuse + specular + emission (自发光) ，最简单的光照公式，各向同性。  games 101/202 一些概念。 
-**但是通过什么保证这几个数相加小于等于1的呢 ？**
-</br>
-2. Tags标记，LightMode, 前向渲染有两个，ForwardBase  和 ForwardAdd。 两个标记分别unity的一个优化，ForwardBase 只有最亮的第一个光源ps执行，其他vs/SH球谐函数计算，然后在执行ForwardAdd的pass。<br/>（本质是在引擎上利用GPU特性做的一些简单优化 : 类似这篇defferd 和forward 的区别<br/>http://download.nvidia.com/developer/presentations/2004/6800_Leagues/6800_Leagues_Deferred_Shading.pdf  
 
+#### 1. 经验模型（不考虑brdf）：
+    color = ambient + diffuse + specular + emission (自发光) ，最简单的光照公式，各向同性。
+ 但是通过什么保证这几个数相加小于等于1的呢 ？(当前还没有证明)
 
-</br>
-UnityLightingCommon.cginc 光照常量，如 \_lightColor0 ,\_WorldSpaceLightPos0 等常量宏
+ 
 
-3 . cg中的 **reflect(input,normal)函数** 。约定方向是以 **-**\_WorldSpaceLightPos0.xyz ，从光源方向看向原点的方向计算的。
-原理为（都转化到了世界空间，所以可以看成在坐标原点的计算）
-https://zhuanlan.zhihu.com/p/152561125 . 
-简单来说，得到入射光线的负方向，然后矢量加法做个推导得出。  
+#### 2. Tags标记(即Unity中引擎处理forward渲染管线的一些思想): 
+    a.LightMode, 前向渲染有两个，ForwardBase 和 ForwardAdd。 两个标记分别unity的一个优化，ForwardBase 只有最亮的第一个光源ps执行，其他 VS/SH 球谐函数计算，然后在执行ForwardAdd的pass。
+    
+    本质思想：减少 m*n的减少复杂度 （光源是m,物体是n）
+      1.引擎层收集所有Tag标记为 ForwardBase/ForwardAdd的 Object.形成两个std::vector<object>
+      2.先拿出场景中最亮的那1个灯光，然后和ForwardBase的那个std::vector<object>做一次循环即
+      3.在拿剩下的最多n个光源 和ForwardAdd的std::vector<object> 做第二个循环,然后结果相加。 
 
-4 . specular 计算 **viewDir** 。 viewDir =\_WorldSpaceCameraPos.xyz - i.vertexWord (对于vs/ps来说，各个处理单位有自己独立的一个视角方向 **顶点的方向到相机的方向**) 。这个之前忽略的一点。 
+    其实优化思想和defferd shading 差不多一样（高斯模糊N*N  变成水平N+竖直N）下面5.1
+   
+    
+#### 3.cg中的 reflect(input,normal)函数
+    约定方向是以 -_WorldSpaceLightPos0.xyz ，从光源方向看向原点的方向计算的。 原理为（都转化到了世界空间，所以可以看成在坐标原点的计算）
+    （简单来说，得到入射光线的负方向，然后矢量加法做个推导得出）
+    
+    更多的时候光照specular用了blinn-phong思想（即 normallize(viewDir + lightDir)）
 
+#### 4. specular 计算 viewDir(之前看书没实践忽略的一个地方)
+    worldViewDir =_WorldSpaceCameraPos.xyz - i.vertexWord (对于vs/ps来说，各个处理单位有自己独立的一个视角方向 顶点的方向到相机的方向) 。这个之前忽略的一点。
+### 当前的光照模型简单概括下：
 
-### 光照模型简单概括下（不考虑能量衰减和brdf反射模型）： 
-Color = ambient + **diffuse** + **specular**   
-
-a. 其中ambient 直接取环境中最亮的环境光即可。</br>  
-b. **diffuse** 有两种常用的计算模型。  
-    **一种为通用的简单lambert 模型 :**<br/> 
-        diffuse = lightColor \* \_Diffuse.xyz * saturate( dot(normal , lightViewDir))      视角无关， 光线、法线有关，各向同性。  
-    **另一种是半条命的 half lamber模型。所以会比较亮** 
-        diffuse = （ lightColor * \_Diffuse.xyz ）* （0.5 \* dot(normal,lightViewDir) + 0.5) ,   会比较亮，各向同性 ，0.5是通常参数。  
+#### Color = ambient + diffuse + specular 
+    其中：
+        a. ambient  环境光，直接取最亮的环境光即可，unity中的为 UNITY_LIGHTMODEL_AMBIENT.xyz
+        b. diffuse  漫反射项目（和观察角度无关，各向同性）:
+            b.1 通用的lambert 光照模型：  lightColor * _Diffuse.xyz * saturate( dot(normal , lightViewDir));
+                和视角无关，注意的是 需要 saturate(dot) 或者max(0,dot) 注意负角度。
+            
+            b.2 value公司的half-lambert模型（cs的那个模型）
+            diffuse = （ lightColor * _Diffuse.xyz ）* （0.5 * dot(normal,lightViewDir) + 0.5) 
+        
+        c. specular 高光项（视角有关、两种模型）
+            c.1 phong 光照模型（利用reflect函数计算反射角，需要考虑负角度问题）
+                反射方向：reflectDir = reflect( -lightDir , normal)
+                视角方向：specular = lightColor * _Specular.xyz * pow ( max( 0 , dot( viewDir , reflectionDir )) , _Gloss )
+            
+            c.2 blinn-phong 光照模型：简化了反射方向(不需要计算反射了)
+                半程向量 ：half = normalize( viewDir + lightDir )
+                最终高光：specular = lightColor * _Specular.xyz * pow(max(0, dot( half, normal )) , _Gloss )
+#### 5.几个参考链接
+1.延迟渲染本质减少m*n 和 shader复杂度的
   
-c. **specular** 通常也有两种计算模型。<br/>
-  1. **phong光照模型**   
-    需要计算反射方向 和 视角方向.  
-    反射方向：reflectDir = reflect( **-lightDir** , **normal**)  
-    视角方向：specular   = lightColor * \_Specular.xyz * pow ( max( 0 , dot( **viewDir** , **reflectionDir** ))  , \_Gloss ) </br>
-                                                                                                      * </br>
-  2. **blinn-phong** 光照模型：简化了反射方向。 
-    先计算了 half = normalize( viewDir + lightDir ) //省了一个reflect函数   
-    然后在计算 specular = lightColor * \_Specular.xyz * pow(max(0, dot( half, normal )) , \_Gloss ) 
- 
- 
+[http://download.nvidia.com/developer/presentations/2004/6800_Leagues/6800_Leagues_Deferred_Shading.pdf](http://download.nvidia.com/developer/presentations/2004/6800_Leagues/6800_Leagues_Deferred_Shading.pdf)
 
+2reflect 函数: 负方向三角函数相加
 
-
+[https://zhuanlan.zhihu.com/p/152561125](https://zhuanlan.zhihu.com/p/152561125)
