@@ -1,4 +1,4 @@
-# shader-book-learn
+# shader-book-learn 总结篇
 引擎最近开发了两年左右了，准备系统的过一遍，先把shader入门精要在过一遍，记录下过程笔记。
 
 </br> 
