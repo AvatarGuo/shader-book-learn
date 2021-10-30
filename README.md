@@ -147,3 +147,117 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
 
 https://zhuanlan.zhihu.com/p/86442304
 
+
+
+## 第七章：基础纹理（abedo,normal,ramp,mask）
+
+#### 1 纹理坐标(左上角还是右上角是(0,0)的那个)
+    
+    a.除了屏幕空间区分，MRT外 ，普通的贴图也要考虑这个概念。
+    unity使用纹理坐标是openGL的传统保持一致，即左下角为（0，0）点。
+
+#### 2 图片的采样格式(unity中的贴图格式)
+    a. point: 最邻近点采样，各种情况下只取最近的那一个元素。（像素风游戏等。
+    b. Bilinear ：四点插值
+    c. Triliner ：考虑了Mipmap，若贴图不开启mipmap 则两者几乎相同。
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/7-1.png)![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/7-2.png)
+
+#### 3.图片的tilling和scale (TRANSFORM_TEX 多图片可以看情况共用一个XXX_ST,节省寄存器）
+    a.问 同样的512x512贴图，为什么有的可以拉伸，有的必须要repeat模式呢？
+    
+        设置XXX_ST 在shader里面。
+        每个properties 定义的贴图，在inspect界面都会有_ST，但是可以共用一个，减少寄存器使用。
+         
+        很简答的思想：因为uv计算好之后乘以 XXX_ST.xy + XXX_ST.zw 本质就是把小的放大了，设置图片格式后才有对应的超边界情况。
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/7-3.png)
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/7-4.png)
+
+#### 4. mipmap采样层数计算相关
+（202中也讲过）
+
+    1. 光栅化最小处理单元 ddx ddy 对应贴图采样。 获取。
+    2. log2N 的方式求mipmap的指定层数， 如1.2 则在两层lerp 在线性求个lerp 即可计算出，
+
+#### 4. 法线贴图，重点注意！！！
+    0.  unity 给法线初始化有个特殊的优化 即 "bump" {} ，贴图导入也要选择NormalMap ，才可以使用UnpackNormal等函数
+        如_BumpMap("normal map",2D) = "bump" {}
+
+
+    1. 存储空间问题： 存储到了切线空间，更容易保存和压缩，如利用 sqrt(1-dot(xy,xy))反推出来z
+    
+    2. 压缩范围问题, 贴图存储范围是[0-1],发现范围是[-1,1]所以要做个 unpack操作
+        即 xy*2 -1 做个unpack
+        通过还有bumpScale, 
+            tangentNoraml.xy = tangentMormal.xy * bumpScale;
+            //所以在反推z轴
+            tangentNoraml.z  = sqrt(1-dot(tangentNoraml.xy,tangentMormal.xy));
+
+    （h42有个优化，去掉了顶点的副切线）
+
+    法线的值存储到贴图上也要考虑这个问题：*0.5 + 0.5 转化到[0-1]范围
+    https://answers.unity.com/questions/1698762/why-does-the-example-normal-shader-multiply-by-05.html
+
+    3. normal 法线 转tangent space 还是world space的问题。子和父空间变换问题
+        通常转tangentSpace计算，因为ps中可以直接采样normal,直接结算。
+        否则的话 需要在ps中做一次矩阵转化 ，将tangentNoram 转化到世界空间上。
+
+    4. defferd shading中 GBuffer的 简单的normal 压缩。
+        Unity 中有一个DXT5nm的纹理格式，只用a通道和g通道，其他通道会被过滤掉的方式去对normal map 本身的四通道进行一个类似压缩。
+        (在UnityCG的UnpackNormal() 函数中也可以看到展开方式)
+
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/7-5.png)
+
+
+#### 5. ramp 贴图（做二次元常用的大块区域一个色块）
+    本质就是按照某种规则生成UV,然后按照这个UV去采样ramp贴图。 
+    x轴和y轴的值对应的贴图上的值都是一样的。
+
+    这里手撸了个 half-lambert diffuse的，即 0.5 * dot(normal,lightDir) + 0.5 来限制到[0,1]范围内
+    光线和法线夹角越小，值越大，使用ramp贴图越后面的值，从而过渡色块。
+
+
+#### 6. mask贴图（多张贴图采样问题）
+
+1.多张贴图采样
+
+    可以根据需求，如normal /mask /abedo 共用一个uv的话（具体情况具体分析，即顶点携带几套贴图，按需用）
+        只用 _MainTexture_ST ，在vert阶段算好一个uv
+        ps 阶段 ，用相同的uv采样其他texture.(可以节省寄存器)
+        （另外以 OpelGL 举例子的话，多个贴图，在bind的时候根据模型属性，比较灵活，不用想的那么死）
+
+
+#### 7 重要的矩阵变换（子空间和父空间的坐标轴变换）
+(核心多读几遍这个 4.6.2)
+http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pdf  (4.6.2  p73) 
+
+    理解之后比较简单的一个推导是(包括顶点动画，之前项目的横版特效功能)：
+    1.  所有坐标轴都是相对于父物体的。 如x轴 = (1,0,0) 是在世界坐标轴下的，所有坐标轴都是嵌套的（骨骼动画树，比较明显）
+
+    2.  比如 世界坐标转tangent 坐标 （等于tangent 转世界的逆矩阵）只考虑x,y,z的话。
+        
+        求出x轴，y轴，z轴 在世界空间的表示( tangent,binormal ,normal) 
+        (切线，副切线，法线顺序不能变，因为有cross,还要考虑tangent.w)
+        
+        worldNormal = UnityObjectToWorldNormal(v.normal);
+        worldTangent  = UnityObjectToWorldDir(v.tangent.xyz);    
+        worldBinormal = cross(worldNormal, worldTangent) * v.tangent.w; 
+
+        切线转世界空间的三个坐标轴都已经有了
+        （所以切线转世界，等于三个坐标轴按照列展开）
+        （世界转切线等于其逆矩阵，等于三个坐标轴按行展开）
+
+        tangentToWorldMatrix =  fixed3x3 ( worldTangent.x , worldBinormal.x , worldNormal.x,
+                                          worldTangent.y , worldBinormal.y , worldNormal.y,
+                                          worldTangent.z , worldBinormal.z . worldNormal.z)
+                                          
+        worldToTangent = fixed3x3(  worldTangent ,
+                                    worldBinormal,
+                                    worldNormal )
+
+    3 另外unity中可以定义宏去写通用代码，如 TANGENT_SPACE_ROTATION 
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/7-6.png)
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/7-7.png) 
+
