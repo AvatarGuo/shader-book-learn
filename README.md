@@ -75,6 +75,7 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
 
 
 
+
 ## 第六章（基础光照）
 
 #### 1. 经验模型（不考虑brdf）：
@@ -91,7 +92,7 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
       2.先拿出场景中最亮的那1个灯光，然后和ForwardBase的那个std::vector<object>做一次循环即
       3.在拿剩下的最多n个光源 和ForwardAdd的std::vector<object> 做第二个循环,然后结果相加。 
 
-    其实优化思想和defferd shading 差不多一样（高斯模糊N*N  变成水平N+竖直N）下面5.1
+    其实优化思想和defferd shading 差不多一样（高斯模糊N*N  变成水平N+竖直N）下面 参考链接
    
     
 #### 3.cg中的 reflect(input,normal)函数
@@ -122,7 +123,16 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
             c.2 blinn-phong 光照模型：简化了反射方向(不需要计算反射了)
                 半程向量 ：half = normalize( viewDir + lightDir )
                 最终高光：specular = lightColor * _Specular.xyz * pow(max(0, dot( half, normal )) , _Gloss )
-#### 5.几个参考链接
+
+#### 5.一个重要的数学变换：法线变换矩阵
+worldNormal = normalize( mul( v.normal , unity_WorldToObject)); 
+
+即顶点法线需要乘以：objectToWorld的逆转矩阵（这里有一个技巧，就是mul 交换位置，可以省下来一次矩阵转置（简单的矩阵乘法特性））
+
+法线变换矩阵的推导利用了和tangent的正交性质进行的推导：（参考3、4）
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/6-1.png)
+
+### 参考链接
 1.延迟渲染本质减少m*n 和 shader复杂度的
   
 [http://download.nvidia.com/developer/presentations/2004/6800_Leagues/6800_Leagues_Deferred_Shading.pdf](http://download.nvidia.com/developer/presentations/2004/6800_Leagues/6800_Leagues_Deferred_Shading.pdf)
@@ -130,3 +140,10 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
 2reflect 函数: 负方向三角函数相加
 
 [https://zhuanlan.zhihu.com/p/152561125](https://zhuanlan.zhihu.com/p/152561125)
+
+3.法线变换矩阵的推导：利用和tangent的约束推导
+
+http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pdf ： 55 P93
+
+https://zhuanlan.zhihu.com/p/86442304
+
