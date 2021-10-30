@@ -74,11 +74,14 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
   d. 慎用if 等语句，gpu的设计情况有关系，GI book 讲的也比较清晰。
 
 
+
 ## 第六章（基础光照）
 
 #### 1. 经验模型（不考虑brdf）：
     color = ambient + diffuse + specular + emission (自发光) ，最简单的光照公式，各向同性。
  但是通过什么保证这几个数相加小于等于1的呢 ？(当前还没有证明)
+
+ 
 
 #### 2. Tags标记(即Unity中引擎处理forward渲染管线的一些思想): 
     a.LightMode, 前向渲染有两个，ForwardBase 和 ForwardAdd。 两个标记分别unity的一个优化，ForwardBase 只有最亮的第一个光源ps执行，其他 VS/SH 球谐函数计算，然后在执行ForwardAdd的pass。
@@ -88,13 +91,12 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
       2.先拿出场景中最亮的那1个灯光，然后和ForwardBase的那个std::vector<object>做一次循环即
       3.在拿剩下的最多n个光源 和ForwardAdd的std::vector<object> 做第二个循环,然后结果相加。 
 
-    其实优化思想和defferd shading 差不多一样（高斯模糊N*N  变成水平N+竖直N）
-    下面这个ppt 挺好的 （降低shader复杂度，所以m*n ，减少m*n  先MRT保存物体状态，第二个pass 根据屏幕大小，执行一次光照计算即可）
-    [http://download.nvidia.com/developer/presentations/2004/6800_Leagues/6800_Leagues_Deferred_Shading.pdf](http://download.nvidia.com/developer/presentations/2004/6800_Leagues/6800_Leagues_Deferred_Shading.pdf)  
+    其实优化思想和defferd shading 差不多一样（高斯模糊N*N  变成水平N+竖直N）下面5.1
+   
     
 #### 3.cg中的 reflect(input,normal)函数
     约定方向是以 -_WorldSpaceLightPos0.xyz ，从光源方向看向原点的方向计算的。 原理为（都转化到了世界空间，所以可以看成在坐标原点的计算）
-    （简单来说，得到入射光线的负方向，然后矢量加法做个推导得出）https://zhuanlan.zhihu.com/p/152561125
+    （简单来说，得到入射光线的负方向，然后矢量加法做个推导得出）
     
     更多的时候光照specular用了blinn-phong思想（即 normallize(viewDir + lightDir)）
 
@@ -119,5 +121,12 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
             
             c.2 blinn-phong 光照模型：简化了反射方向(不需要计算反射了)
                 半程向量 ：half = normalize( viewDir + lightDir )
-                最终高光 ：specular = lightColor * _Specular.xyz * pow(max(0, dot( half, normal )) , _Gloss )
+                最终高光：specular = lightColor * _Specular.xyz * pow(max(0, dot( half, normal )) , _Gloss )
+#### 5.几个参考链接
+1.延迟渲染本质减少m*n 和 shader复杂度的
+  
+[http://download.nvidia.com/developer/presentations/2004/6800_Leagues/6800_Leagues_Deferred_Shading.pdf](http://download.nvidia.com/developer/presentations/2004/6800_Leagues/6800_Leagues_Deferred_Shading.pdf)
 
+2reflect 函数: 负方向三角函数相加
+
+[https://zhuanlan.zhihu.com/p/152561125](https://zhuanlan.zhihu.com/p/152561125)
