@@ -67,7 +67,7 @@ Shader "Unity Shader book/Chapter7/NormalMapWorldSpace2"
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                
+
                 o.uv.xy = TRANSFORM_TEX(v.uv.xy, _MainTex);
                 o.uv.zw = TRANSFORM_TEX(v.uv.xy , _BumpTex);//对Normal map做拆分
 
@@ -79,7 +79,7 @@ Shader "Unity Shader book/Chapter7/NormalMapWorldSpace2"
                 // fixed3 worldNormal  = WorldSpaceViewDir( v.normal  );
                 // fixed3 worldTangent = WorldSpaceViewDir( v.tangent );
 
-
+                
                 //这个是世界方向 ,法线的切线变换 
                 fixed3 worldNormal  = UnityObjectToWorldNormal( v.normal  );//normal 要专门计算
                 fixed3 worldTangent = UnityObjectToWorldDir( v.tangent );
@@ -88,7 +88,7 @@ Shader "Unity Shader book/Chapter7/NormalMapWorldSpace2"
                 fixed3 worldBiNormal = cross(worldNormal.xyz ,worldTangent.xyz) * v.tangent.w;
 
                 fixed3 worldPos = mul((fixed3x3)unity_ObjectToWorld, o.vertex ).xyz;
-                
+
                 //分别算出三个轴，根据三个轴做转化 ,4.6.2 还是有一些迷糊
                 //拿到在目标坐标系的x,y,z轴，然后按照列展开。  （即分别x轴展开，y轴展开和z轴展开）
                 o.T2W0 = fixed4( worldTangent.x , worldBiNormal.x, worldNormal.x , worldPos.x);
@@ -134,7 +134,7 @@ Shader "Unity Shader book/Chapter7/NormalMapWorldSpace2"
 
 
 
-              
+
                 return fixed4( ambient + diffuse + specular   , 1.0);
             }
             ENDCG

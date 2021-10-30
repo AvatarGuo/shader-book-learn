@@ -97,7 +97,7 @@ Shader "Unity Shader book/Chapter7/NormalMapTangetSpace 2"
                 fixed4 packedNormal =  tex2D( _BumpTex , i.uv.zw );
                 fixed3 tangentNormal = UnpackNormal(packedNormal); // *2 - 1 然后缩放回[-1,1] 范围内
                 tangentNormal.xy *= _BumpScale;
-                
+
                 //本质就是normalize的方法又写了一遍
                 tangentNormal.z = sqrt( 1 - saturate( dot( tangentNormal.xy ,tangentNormal.xy )) );
 
