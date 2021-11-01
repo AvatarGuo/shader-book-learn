@@ -10,9 +10,9 @@
     {
         Tags {
                 "RenderType"="TransParent" //unity中将渲染模式进行一个分组（通常用于被着色器替换功能）
-                "Queue"="TransParent"
 
-                // "IgnoreProjector" = "True"
+                "Queue"="TransParent"
+                "IgnoreProjector" = "True"
             }
 
         Pass
@@ -22,6 +22,9 @@
             {
                 "LightingMode"= "ForwardBase"
             }
+
+            // ZWrite off
+            // Blend SrcAlpha OneMinusSrcAlpha
 
             ZWrite off
             Blend SrcAlpha OneMinusSrcAlpha
