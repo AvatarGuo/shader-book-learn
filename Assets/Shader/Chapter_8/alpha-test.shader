@@ -55,12 +55,9 @@
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
-
-                fixed3 normal:TEXCOORD1;
+                fixed3 worldNormal:TEXCOORD1;
                 fixed3 worldPos:TEXCOORD2;
-
             };
-
 
 
             v2f vert (appdata v)
@@ -69,7 +66,7 @@
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 
-                o.normal    = UnityObjectToWorldNormal(v.normal);
+                o.worldNormal    = UnityObjectToWorldNormal(v.normal);
                 o.worldPos  = mul( unity_ObjectToWorld , v.vertex).xyz;
 
                 return o;
@@ -89,7 +86,7 @@
                 // fixed3 viewDir = UnityWorldSpaceViewDir(o.worldPos);
 
                 fixed3 lightDir = normalize( UnityWorldSpaceLightDir(i.worldPos ) );
-                fixed3 normal   = normalize( i.normal );
+                fixed3 normal   = normalize( i.worldNormal );
                 fixed3 viewDir  = normalize( UnityWorldSpaceViewDir(i.worldPos) );
                 //没有法线贴图这里加个specular吧
 

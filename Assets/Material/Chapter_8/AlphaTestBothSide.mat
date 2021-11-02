@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: AlphaBlendZWriteMat
-  m_Shader: {fileID: 4800000, guid: 9b14edc983a858b45afdc454d2382e1b, type: 3}
+  m_Name: AlphaTestBothSide
+  m_Shader: {fileID: 4800000, guid: b47a38a6071b80c45a591a315d715e7f, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -56,8 +56,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _AlphaScale: 1
     - _BumpScale: 1
+    - _ClipScale: 0.607
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
