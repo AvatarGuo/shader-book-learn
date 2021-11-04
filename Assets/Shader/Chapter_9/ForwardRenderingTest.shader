@@ -185,8 +185,8 @@ Shader "Unity Shader book/Chapter9/Forward Rendering"
                     //一般衰减系数是距离的平方，球面衰减系数
 
                     //先求出在光源空间下的坐标
-                    fixed3 lightCoord = mul(unity_WorldToLight,float4(i.worldPos,1.0)).xyz;
-                    fixed  atten = tex2D( _LightTexture0 ,dot(lightCoord,lightCoord).rr).UNITY_ATTEN_CHANNEL;
+                    // fixed3 lightCoord = mul(unity_WorldToLight,float4(i.worldPos,1.0)).xyz;
+                    // fixed  atten = tex2D( _LightTexture0 ,dot(lightCoord,lightCoord).rr).UNITY_ATTEN_CHANNEL;
 
                     #if defined (POINT)
 				        float3 lightCoord = mul(unity_WorldToLight, float4(i.worldPos, 1)).xyz;
@@ -211,5 +211,11 @@ Shader "Unity Shader book/Chapter9/Forward Rendering"
             ENDCG
 
         }
+
+
     }
+
+    FallBack "Diffuse"
+
+
 }
