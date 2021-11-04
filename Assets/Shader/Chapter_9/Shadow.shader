@@ -37,13 +37,13 @@
 
             struct v2f
             {
-                // float2 uv : TEXCOORD0;
-                float4 vertex : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float4 pos : SV_POSITION;
 
-                float3 worldPos:TEXCOORD0;
-                float3 worldNormal:TEXCOORD1;
+                float3 worldPos:TEXCOORD1;
+                float3 worldNormal:TEXCOORD2;
 
-                SHADOW_COORDS(2)
+                SHADOW_COORDS(3)
             };
 
             sampler2D _MainTex;
@@ -56,8 +56,8 @@
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                // o.uv = TRANSFORM_TEX(v.uv, _MainTex); // *xy + zw
+                o.pos = UnityObjectToClipPos(v.vertex);
+                o.uv = TRANSFORM_TEX(v.uv, _MainTex); // *xy + zw
 
                 o.worldPos = mul(unity_ObjectToWorld,v.vertex);
                 //正常变换的逆转矩阵
@@ -90,7 +90,7 @@
 
 
                 fixed shadow = SHADOW_ATTENUATION(i);
-                fixed3 color =  (diffuse + specular ) * atten + ambient;
+                fixed3 color =  (diffuse + specular ) * atten * shadow + ambient;
 
                 return fixed4(color,1.0);
             }
@@ -171,7 +171,6 @@
                 fixed3 specular = _Specular.xyz * _LightColor0.xyz * pow(saturate(dot(worldNormal,halfVector)),_Gloss);
 
                 //需要考虑一个衰减， base中只计算了direct 光，所以衰减为1
-  
 
                 #ifdef USING_DIRECTIONAL_LIGHT
                     fixed atten = 1;
@@ -192,6 +191,9 @@
 
 
     }
+
+
+    FallBack "Specular"
 
 
 }
