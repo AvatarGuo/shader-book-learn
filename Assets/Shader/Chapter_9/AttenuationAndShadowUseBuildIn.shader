@@ -134,6 +134,8 @@
                 float3 worldPos:TEXCOORD1;
                 float3 worldNormal:TEXCOORD2;
 
+                SHADOW_COORDS(3)
+
             };
 
             sampler2D _MainTex;
@@ -153,6 +155,7 @@
                 //正常变换的逆转矩阵
                 o.worldNormal = UnityObjectToWorldNormal(v.normal);
 
+                TRANSFER_SHADOW(o);
                 return o;
             }
 
@@ -185,12 +188,14 @@
 
                 //需要考虑一个衰减， base中只计算了direct 光，所以衰减为1
 
-                #ifdef USING_DIRECTIONAL_LIGHT
-                    fixed atten = 1;
-                #else
-                    float3 lightCoord = mul( unity_WorldToLight ,float4( i.worldPos , 1.0 )).xyz;
-                    fixed atten = tex2D(_LightTexture0, dot(lightCoord,lightCoord).rr ).UNITY_ATTEN_CHANNEL;
-                #endif
+                // #ifdef USING_DIRECTIONAL_LIGHT
+                //     fixed atten = 1;
+                // #else
+                //     float3 lightCoord = mul( unity_WorldToLight ,float4( i.worldPos , 1.0 )).xyz;
+                //     fixed atten = tex2D(_LightTexture0, dot(lightCoord,lightCoord).rr ).UNITY_ATTEN_CHANNEL;
+                // #endif
+
+                UNITY_LIGHT_ATTENUATION(atten , i , i.worldPos );
 
                 fixed3 color =  (diffuse + specular ) * atten ;
 
