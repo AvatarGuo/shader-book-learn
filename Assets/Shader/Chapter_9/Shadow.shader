@@ -207,7 +207,7 @@ Shader "Unity Shader book/Chapter9/Shadow"
     }
 
 
-    FallBack "Specular"
+    FallBack "VertexLit"
 
 
 }

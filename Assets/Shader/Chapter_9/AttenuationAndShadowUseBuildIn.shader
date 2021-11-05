@@ -164,7 +164,7 @@
 
                 fixed4 abedo = tex2D(_MainTex, i.uv);
 
-                fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz * abedo.xyz;
+                // fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz * abedo.xyz;
 
                 fixed3 worldNormal = normalize(i.worldNormal);
 
@@ -208,11 +208,11 @@
 
         }
 
-
-
     }
-    
-    FallBack "Specular"
+
+    // FallBack "Specular"
+    //生成阴影的本质callback
+    FallBack "VertexLit"
 
 
 }
