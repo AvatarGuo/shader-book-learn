@@ -20,9 +20,6 @@
                 "IgnoreProjector"="True"
              }
 
-
-        LOD 100
-
         Pass
         {
             Tags
@@ -30,11 +27,13 @@
                 "LightMode"="ForwardBase"
             }
 
+            Cull Off
+
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
 
-            #pragma multi_compile_fwdadd
+            #pragma multi_compile_fwdbase
 
             #include "UnityCG.cginc"
             #include "UnityLightingCommon.cginc"
@@ -76,7 +75,7 @@
                 o.worldNormal = UnityObjectToWorldNormal(v.normal);
                 o.worldPos = mul(unity_ObjectToWorld,v.vertex);
 
-                TRANSFER_SHADOW(O);
+                TRANSFER_SHADOW(o);
                 return o;
             }
 
