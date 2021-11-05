@@ -32,7 +32,7 @@ Shader "Unity Shader book/Chapter9/Shadow"
 
             struct appdata
             {
-                float4 vertex : POSITION;
+                float4 vertex : POSITION; //a2v 一定有vertex
                 float2 uv : TEXCOORD0;
                 float4 normal:NORMAL;
             };
@@ -40,7 +40,7 @@ Shader "Unity Shader book/Chapter9/Shadow"
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                float4 pos : SV_POSITION;
+                float4 pos : SV_POSITION; //v2f一定要有pos
 
                 float3 worldPos:TEXCOORD1;
                 float3 worldNormal:TEXCOORD2;
