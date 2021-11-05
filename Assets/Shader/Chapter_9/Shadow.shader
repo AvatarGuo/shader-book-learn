@@ -1,4 +1,6 @@
-﻿Shader "Unity Shader book/Chapter9/Shadow"
+﻿// Upgrade NOTE: replaced '_LightMatrix0' with 'unity_WorldToLight'
+
+Shader "Unity Shader book/Chapter9/Shadow"
 {
     Properties
     {
@@ -115,6 +117,7 @@
 
             #include "UnityCG.cginc"
             #include "UnityLightingCommon.cginc"
+            #include "AutoLight.cginc"
 
             struct appdata
             {
@@ -161,7 +164,17 @@
                 fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz * abedo.xyz;
 
                 fixed3 worldNormal = normalize(i.worldNormal);
-                fixed3 lightDir = normalize( UnityWorldSpaceLightDir(i.worldPos));
+
+                //最好这里还是用直接WorldPos0吧，因为当前逐像素shading的
+                #ifdef USING_DIRECTIONAL_LIGHT
+                    //平行光
+                    fixed3 lightDir = normalize( _WorldSpaceLightPos0 );//- i.worldPos;
+                #else
+                    fixed3 lightDir = normalize( _WorldSpaceLightPos0- i.worldPos );
+                #endif
+
+                //
+                // fixed3 lightDir = normalize( UnityWorldSpaceLightDir(i.worldPos));
                 fixed3 viewDir =normalize(UnityWorldSpaceViewDir(i.worldPos));
 
                 fixed3 halfVector = normalize(lightDir + viewDir);
@@ -175,7 +188,8 @@
                 #ifdef USING_DIRECTIONAL_LIGHT
                     fixed atten = 1;
                 #else
-                    fixed atten = 0;
+                    float3 lightCoord = mul( unity_WorldToLight ,float4( i.worldPos , 1.0 )).xyz;
+                    fixed atten = tex2D(_LightTexture0, dot(lightCoord,lightCoord).rr ).UNITY_ATTEN_CHANNEL;
                 #endif
 
                 fixed3 color =  (diffuse + specular ) * atten ;
