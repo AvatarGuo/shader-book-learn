@@ -15,15 +15,18 @@
     SubShader
     {
         Tags {
-                "RenderType"="TransparentCut"
+                "RenderType"="TransParentCutout"
                 "Queue" = "AlphaTest"
                 "IgnoreProjector"="True"
              }
+
+
         LOD 100
 
         Pass
         {
-            Tags{
+            Tags
+            {
                 "LightMode"="ForwardBase"
             }
 
@@ -96,16 +99,17 @@
                 fixed3 diffuse = abedo.xyz * _LightColor0.xyz * _Color.xyz * dot( worldNormal , lightDir );
                 fixed3 specular = _Specular.xyz * _LightColor0.xyz * pow(dot(worldNormal,halfVector) , _Gloss);
 
-                UNITY_LIGHT_ATTENUATION(atten , i, i.worldPos);
 
+                UNITY_LIGHT_ATTENUATION(atten , i, i.worldPos);
                 fixed3 color = ambient + ( diffuse + specular) * atten;
 
-                return fixed4(color,1.0);
+
+                return fixed4( color , 1.0 );
             }
             ENDCG
         }
     }
 
-    FallBack "TransParent/Cutout/VertexLit"
+    FallBack "Transparent/Cutout/VertexLit"
     // FallBack "VertexLit"
 }

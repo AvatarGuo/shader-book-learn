@@ -88,10 +88,11 @@
                 //需要考虑一个衰减， base中只计算了direct 光，所以衰减为1
                 // fixed atten = 1; 不用声明了，可以查看下AutoLight.cginc中的代码
                 UNITY_LIGHT_ATTENUATION(atten , i , i.worldPos );
+                // fixed atten = 1;
 
 
-                fixed shadow = SHADOW_ATTENUATION(i);
-                fixed3 color =  (diffuse + specular ) * atten * shadow + ambient;
+                // fixed shadow = SHADOW_ATTENUATION(i);
+                fixed3 color =  (diffuse + specular ) * atten  + ambient;
 
                 return fixed4(color,1.0);
             }
