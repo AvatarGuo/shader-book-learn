@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ForwardRendering
-  m_Shader: {fileID: 4800000, guid: 9eb3545337594d2448ed6257279b0f6a, type: 3}
+  m_Name: testMat
+  m_Shader: {fileID: 4800000, guid: dcbab41a3e0519b4ab6ae7ce49625445, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -60,7 +60,7 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _Gloss: 194.3
+    - _Gloss: 240
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1

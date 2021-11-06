@@ -89,7 +89,7 @@
 
 
                 fixed3 color = ambient + diffuse;
-                return fixed4(color,abedo.a * _AlphaScale );
+                return fixed4(color , abedo.a * _AlphaScale );
             }
             ENDCG
         }

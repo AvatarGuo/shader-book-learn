@@ -1,8 +1,8 @@
 ﻿Shader "Unity Shader book/Chapter9/AlphaBlendWithShadow" 
-//alpha blend 有几个要点， 
+//alpha blend 有几个要点，
 //本质是      1. 在不透明物体之后渲染的， 关闭深度写入，取framebuffer 原来的值 和自身SrcXXX 做个混合相加,
-//           2. Blend 相关命令
-//           3. 实际采样了贴图的a 通道的值了
+//           2. Blend 相关命令  如正片叠底，线性减淡
+//           3. 实际采样了贴图的 a 通道的值了
 {
     Properties
     {
@@ -15,10 +15,9 @@
     {
         Tags {
                 "RenderType" = "Transparent" 
-                "Queue" = "Transparent"
+                "Queue" = "Alphatest"
                 "IgnoreProjector" = "True"
             }
-
 
         Pass
         {
@@ -27,16 +26,18 @@
                 "LightMode"="ForwardBase"
             }
 
-            ZWrite off
+            ZWrite Off
             Blend SrcAlpha OneMinusSrcAlpha
 
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_fwdbase
 
 
             #include "UnityCG.cginc"
             #include "UnityLightingCommon.cginc"
+            #include "AutoLight.cginc"
 
 
             struct appdata
@@ -50,9 +51,11 @@
             {
                 float2 uv : TEXCOORD0;
                 // UNITY_FOG_COORDS(1) 也是从1 开始的，本质两者是相同的
-                float4 vertex : SV_POSITION;
+                float4 pos : SV_POSITION;
                 float3 worldPos:TEXCOORD1;
                 float3 worldNormal:TEXCOORD2;
+
+                SHADOW_COORDS(3)
             };
 
             sampler2D _MainTex;
@@ -65,12 +68,13 @@
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.pos = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 
                 o.worldPos = mul(unity_ObjectToWorld,v.vertex);
                 o.worldNormal = UnityObjectToWorldNormal(v.normal);
 
+                // TRANSFER_SHADOW(o);
                 return o;
             }
 
@@ -88,9 +92,10 @@
                 fixed3 viewDir = normalize( UnityWorldSpaceViewDir(i.worldPos) ) ;
                 fixed3 halfVector = normalize(viewDir + lightDir);
 
-                fixed3 specular = _Specular.xyz * _LightColor0.xyz * pow(max(0,dot( normalDir ,halfVector )  ) ,_Gloss);
+                // fixed3 specular = _Specular.xyz * _LightColor0.xyz * pow(max(0,dot( normalDir ,halfVector )  ) ,_Gloss);
 
-                fixed3 color =  ambient + diffuse + specular;
+                UNITY_LIGHT_ATTENUATION(atten, i , i.worldPos);
+                fixed3 color =  ambient + (diffuse ) * atten;
 
 
                 return fixed4(color,abedo.a);
@@ -98,4 +103,7 @@
             ENDCG
         }
     }
+
+    // FallBack "Transparent/VertexLit" 透明物体自身并没包含阴影投射信息
+    FallBack "VertexLit"
 }
