@@ -261,3 +261,80 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_chapter_4.pd
 ![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/7-6.png)
 ![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/7-7.png) 
 
+
+
+## 第八章: 透明效果（渲染顺序，混合，Cull、ZWrite） 
+
+**本质是和Framebuffer中已经渲染的值做个混合**
+
+#### 1.两个概念：
+a. **透明度测试** ：即 clip 函数 ，透明度小于某个阈值直接干掉该片元像素
+
+b. **透明度混合**：半透效果 Blend, ZWrite 命令和已经在FrameBuffer中颜色做混合
+
+
+
+#### 2. 渲染思想：（即利用渲染顺序，先渲染，后混合）
+先渲染不透明物体（结果存储到framebuffer中），后渲染半透物体，通过Blend 命令和之前的渲染结果做混合。（ZWrite 根据实际场景需要选择打开或关闭，如42半透在水里的效果）
+
+
+    a. unity中有个Queue的Tag ,可设置物体的渲染顺序 (索引越小越早被提前渲染)
+    b. 不透明物体渲染顺序不重要，因为会有early-z等各种优化，弊端是overdraw 都9012年了，不透明物体可以不考虑顺序
+    c. Queue Alphatest 、Transparent 
+
+https://docs.unity3d.com/ScriptReference/Rendering.RenderQueue.html
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/8-0.png)
+
+
+
+#### 有个问题，水体半透渲染的问题 。（水上水下的问题）
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/8-1.png)
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/8-2.png)
+
+
+#### 3.  半透明物体自身的遮挡相关。（本书第一次双pass实践，即第一个pass写深度 ColorMask 过滤掉其他，第二个pass 正常渲染）
+
+**单Pass** ,alpha混合的结果
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/8-3.png)
+
+**双pass**。开启了深度写入效果。（注意的是：第一个pass写了深度，模型自身的透明效果看不到了）
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/8-4.png)
+
+    ZWrite On
+    ColorMask 0
+
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/8-5.png)
+
+
+#### 4. 混合命令（正片叠底，线性减淡，就是PhotoShop里面的图层混合）
+    0. 混合命令
+        SrcXXX 指的是当前的颜色
+        Dxx 指的是当前Framebuffer中已经有的颜色。
+
+    1.  在Unity中只使用Blend命令就行（除了Blend off 外）. 
+        openGL中 要使用glEnable(GL_BLEND)来开启混合。
+
+    2.  混合是逐片元的操作。不可编程。高度可配置，
+        （正片叠底等ps的乱七八糟的效果）
+        
+        常用的 如：
+            Blend SrcAplha OneMinusSrcAlpha
+            Blend One One 
+
+#### 5.Cull 在透明度相关的注意
+默认是会Cull Back的。不透明物体需要看情况 Cull off
+
+    1.透明度测试，要想显示clip 后的pixel ，要设置Cull off
+    2.透明度混合，如果要显示模型后面的，可以双pass ，
+        pass 1 : Cull Front 
+        pass 2:  Cull Back 
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/8-6.png)
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/8-7.png)
+
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/8-8.png)
+
+
