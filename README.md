@@ -424,6 +424,10 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_images.html
 
 ![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/9-2.png)
 
+（如果没有平行光base pass中全黑光源处理，如下图，关了平行光源打开了点光源）
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/9-2-1.png)
+
 2. add pass ,去掉环境光,自发光的计算:
 
         a. 颜色仍然可以使用_LightColor0
