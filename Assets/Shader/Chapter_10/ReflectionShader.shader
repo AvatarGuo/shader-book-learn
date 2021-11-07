@@ -34,6 +34,7 @@
 
             #include "UnityCG.cginc"
             #include "UnityLightingCommon.cginc"
+            #include "AutoLight.cginc"
 
             struct appdata
             {
@@ -43,15 +44,22 @@
 
             struct v2f
             {
-                float4 vertex : SV_POSITION;
+                float4 pos : SV_POSITION;
 
                 float3 worldNormal:TEXCOORD1;
 
                 float3 worldLightDir:TEXCOORD2;
                 float3 worldViewDir:TEXCOORD3;
 
+
                 //反射方向 即观察方向的反射方向
                 float3 worldRef1: TEXCOORD4;
+
+                float3 worldPos:TEXCOORD5;
+
+                SHADOW_COORDS(6)
+
+
             };
 
             fixed4 _Color;
@@ -62,24 +70,25 @@
             samplerCUBE _CubeMap; 
             fixed _ReflectAmont;
             fixed4 _ReflectColor;
-            
+
 
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.pos = UnityObjectToClipPos(v.vertex);
 
                 //正常变换矩阵的逆转矩阵
                 o.worldNormal = UnityObjectToWorldNormal(v.normal);
 
-                fixed3 worldPos = mul(unity_ObjectToWorld,v.vertex).xyz;
+                o.worldPos = mul(unity_ObjectToWorld,v.vertex).xyz;
 
-                o.worldLightDir = UnityWorldSpaceLightDir(worldPos);
-                o.worldViewDir  = UnityWorldSpaceViewDir(worldPos);
+                o.worldLightDir = UnityWorldSpaceLightDir(o.worldPos);
+                o.worldViewDir  = UnityWorldSpaceViewDir(o.worldPos);
 
                 //世界空间的反射方向
                 o.worldRef1 = reflect( -o.worldViewDir , o.worldNormal );
 
+                TRANSFER_SHADOW(o);
                 return o;
             }
 
@@ -99,14 +108,18 @@
                 fixed3 specular = _LightColor0.xyz * _Specular.xyz * pow(max(0,dot(worldNormal,halfVector)) , _Gloss);
 
                 fixed3 worldRef1 =  i.worldRef1;//texCUBE函数不一定需要归一化
-                
+
                 fixed3 reflection = texCUBE( _CubeMap ,worldRef1  ).rgb * _ReflectColor.xyz ;
 
 
-                fixed3 color = ambient + lerp(diffuse, reflection , _ReflectAmont) + specular;
+                UNITY_LIGHT_ATTENUATION(atten, i ,i.worldPos);
+
+                fixed3 color = ambient + ( lerp(diffuse, reflection , _ReflectAmont) + specular) * atten;
                 return fixed4(color,1.0);
             }
             ENDCG
         }
     }
+
+    FallBack "VertexLit"
 }
