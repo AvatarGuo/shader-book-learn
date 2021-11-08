@@ -4,7 +4,6 @@
     {
 
         _Color("color tint",color) = ( 1.0, 1.0, 1.0, 1.0)
-
         _Specular("specular",color) = (1.0 ,1.0, 1.0 ,1.0)
         _Gloss("gloss",range(20.0,240)) = 20
 
