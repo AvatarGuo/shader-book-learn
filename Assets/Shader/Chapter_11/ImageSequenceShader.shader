@@ -74,7 +74,9 @@ Shader "Unity Shader book/Chapter11/ImageSequenceShader"
                 float row  = floor(time/_HorizontalAmont);
                 float col  = time - row * _HorizontalAmont;
 
-                half2 uv = float2( i.uv.x / _HorizontalAmont,  i.uv.y / _VerticalAmont);
+                //最小单位的uv，然后做个偏移计算即可。
+                //uv 1,1,是最大的那个
+                half2 uv = float2(  i.uv.x / _HorizontalAmont,  i.uv.y / _VerticalAmont);
                 uv.x += col / _HorizontalAmont;
                 uv.y -= row / _VerticalAmont;
 
