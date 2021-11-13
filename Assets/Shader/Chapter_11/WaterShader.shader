@@ -67,13 +67,14 @@
 
             v2f vert (appdata v)
             {
+                //对顶点做个偏移
                 v2f o;
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
 
                 float4 offset;
                 offset.yzw = float3(0.0,.0,.0);
-
                 offset.x = sin(_Frequency * _Time.y + v.vertex.x  * _InWaveLength +v.vertex.y * _InWaveLength + v.vertex.z * _InWaveLength) * _Magnitude;
+
                 o.vertex = UnityObjectToClipPos(v.vertex + offset);
                 o.uv += float2( 0.0 ,_Time.y * _Speed);
                 return o;
