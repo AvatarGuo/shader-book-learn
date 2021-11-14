@@ -754,3 +754,106 @@ https://zhuanlan.zhihu.com/p/99362830
 
 一个视频教程  
 https://assetstore.unity.com/packages/tools/utilities/substance-in-unity-110555
+
+
+## 第十一章：画面动起来 （两个有趣的数学：求UV,billboard 求旋转坐标）
+在shader中使用时间的变量（_Time,_SinTime,_CosTime,unity_DeltaTime  ）float4 类型  
+uv 求坐标比较简单。
+
+billboard 求旋转坐标比较有趣：（同父子空间变换矩阵区分开）  
+  简单理解就是点A原始空间的坐标位置 =  旋转后的位置。 对于坐标系来说相对位置始终是不变的
+
+
+### 1. 纹理动画 （UV，序列帧）  
+若背景贴图是半透明： 
+        
+    a. 属性  
+        { Queue = Transparent ,RenderType =Transparent IgnoreProjector = True}
+        (RenderType多用于shader中的替换)
+    b.command 
+        ZWrite off (不过这个通常看情况，因为就算深度写入了，如果渲染顺序比较晚，不透明问题已经渲染好了，加个Blend 即可)
+        Blend SrcAlpha OneMinusScrAlpha 
+
+有一点需要注意的就是计算行列UV的算法：
+    
+    比如 S = 4 * 行 + 列
+    所以先求出行，然后余数是列，即很简单的一个四行四列求坐标的问题。
+    令 S= time 
+    则 行 =S/4  ,列 = S - S*4
+    
+一个注意是：UV偏移中的y要用 减法，    
+因为：Unity纹理坐标的竖直方向是从下到上逐渐增大的  
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/11-0.png)  
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/11-1.png)
+
+
+示例2：两张贴图混合。
+两张贴图都在一个shader里面采样，可以完美的利用后面那张图的a通道进行混合。  
+（正好透明和不透明混合）  
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/11-2.png)
+
+### 2.顶点动画 （DisableBatching , shadow caster ）billborad 算法
+
+
+1 水流效果  
+注意：顶点动画 tag 需要关闭batch    
+    相同渲染状态的才能合批，所以UI的shader里面不能改变顶点位置，每一帧的渲染状态都变了。     
+    (不关闭也可能会和其他底层合批了，效果就不对了)  
+
+
+2.顶点动画 广告牌 bilboard 效果。     
+调整朝向 到摄像机，旋转下坐标轴   
+**核心算法： 不管怎么旋转，顶点在模型空间的相对位置是不变的。**  
+即   原来的点A,原来的三个坐标轴 Ox,Oy,Oz,  A = Ox * x + Oy * y + Oz * z  
+旋转后的点A,旋转后的三个坐标轴 Rx,Ry,Rz ,A = Rx * x + Ry * y + Rz * z  
+
+
+（三个轴构建坐标系，一个锚点，即该坐标轴绕着锚点旋转）  
+（法线（视口方向） ，up,right）
+
+    output.pos = mul(UNITY_MATRIX_P, 
+                mul(UNITY_MATRIX_MV, float4(0.0, 0.0, 0.0, 1.0))
+                + float4(input.vertex.x, input.vertex.y, 0.0, 0.0));
+
+    //核心思想是将原点朝向相机后，原坐标空间的某个点，在新坐标 还在这个点上。
+
+shadow gun 有一个优化，即构建新的坐标轴
+
+    float3  viewerLocal = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos, 1));
+    float3  localDir = viewerLocal - float3(0,0,0);
+
+    localDir.y = lerp(0, localDir.y, _VerticalBillboarding);
+
+    localDir = normalize(localDir);
+
+    //正常情况下模型空间的up 是 0，1，0, 但是因为local dir 是正常算的，可能和up方向平行
+    //如果平行 ，则取右方向（当然右方向也可能重合，可以工程规避）
+
+    //另外这里还有个?选择语句
+    float3  upLocal = abs(localDir.y) > 0.999f ? float3(0, 0, 1) : float3(0, 1, 0);
+    float3  rightLocal = normalize(cross(localDir, upLocal));
+    upLocal = cross(rightLocal, localDir);
+
+    //在新坐标轴中还原x,y,z信息
+    float3  BBLocalPos = rightLocal * v.vertex.x + upLocal * v.vertex.y;
+    o.pos = mul(UNITY_MATRIX_MVP, float4(BBLocalPos, 1));
+
+一个比较好的文章   
+https://zhuanlan.zhihu.com/p/29072964
+
+
+ps 另外当前几个矩阵挺有意思的：
+
+    1 法线变换矩阵
+    2 父子空间变换矩阵
+    3 billboard的坐标轴变换
+
+    另外games103讲的 旋转矩阵本身就是正交矩阵，也挺清晰的
+
+
+**另外要注意的是：如果写了投射阴影，在LightMode = shadow caster 的pass中要做相同的顶点变换。** 
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/11-3.png)
+
