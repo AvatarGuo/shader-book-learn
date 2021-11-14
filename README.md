@@ -585,3 +585,172 @@ http://candycat1992.github.io/unity_shaders_book/unity_shaders_book_images.html
 写shader的话统一光照和阴影的衰减方便一些 ，定义和计算都一样，只是ps里面换了个更统一的函数。
 
 
+
+## 第十章：高级纹理（CubeMap/RT/procedural）
+1. CubeMap (天空盒子 IBL 环境光贴图，立方体或者球 ，保存环境光贴图 )
+2. RT (1. 相机生成，传给shader。 2 grab pass 带名字字符串/不带名字字符串)
+3. ProduceDural Texture 程序化动态生成贴图                                                  
+        
+        1. new Texture2D() ,texture2d.SetPixel() ,texture2d.apply(),pass to shader。
+        2. commandbuffers  ：控制camera和 light渲染阶段 camera render state Light render stage 
+        3. Substance Designer
+
+### 一 立方体纹理 
+存储环境光的一种方式。即反射方向放一个面片，tex2D采值参与计算或lerp。 (pbr中 IBL 的类似irradiance map ，SH lightprobe 等存储环境光)
+
+a. 凸面体采样周围环境光准确一些 ，（因为凹面体可能反射自身）。  
+b. unity立方体纹理常用的地方：
+    1： 天空盒子。（skybox）  
+    2：周围环境光反射。（ environment reflections ）  
+（此处主要是静态的用法，物体可以变位置，但是整个场景环境不能变，变的话需要重新烘焙,或者 Camere.RenderToCubemap实时更新RT，但是很耗 ,实时一般用 ReflectionProbes)   
+
+https://docs.unity3d.com/Manual/class-Cubemap.html     
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/10-1.png)  
+
+
+#### 1 ：天空盒子（skybox）    
+a. SkyBox 对周围环境包围一个盒子，这个盒子六个面，Unity中整个世界都被包含了六个面。  
+b. 渲染顺序： 	在所有不透明物体渲染之后渲染的。  
+c. 背后的网格mesh:  是立方体网格 或者 球体网格（本质一个面片放了贴图）。    
+d. PBR中： 可设置HDR的CubeMap。   
+
+可动态runtime/静态editor 创建，通常美术场景会弄好。 静态效果好一些（废话）
+https://docs.unity3d.com/ScriptReference/Camera.RenderToCubemap.html
+
+
+    动态(runtime)： Camera.RenderToCubeMap() , CubeMap 需要勾选 readable 选项。
+    This function is mostly useful in the editor for "baking" static cubemaps of your Scene. 
+    If you want a realtime-updated cubemap, use RenderToCubemap variant that uses a RenderTexture with a cubemap dimension
+
+    Note also that ReflectionProbes are a more advanced way of performing realtime reflections
+
+#####  **shader中常用的用法**： reflect, refraction ,菲涅耳现象（一定角度全反射，菲涅耳曲线，夕阳下的地板）
+
+  
+**a.反射**（像是外面镀了一层金属一样）
+
+**(即人眼看到的方向 viewDir，通过反射公式（reflect）获得入射方向，然后入射方向在环境面片上采像素值)**  
+
+当前简单的例子：  
+
+    a. 在该位置烘焙一个CubeMap ，然后在shader中 samperCUBE , texCUBE 采样该CubeMap  
+    b.  CG中的reflect 方法求出 入射方向:  inCubeDir = reflect(-worldViewDir,worldNormal)  
+    c.  入射方向 采样环境光。 这里是CubeMap存储 ,CG里的 texCUBE(inCubeDir )。采样函数不需要归一化方向  
+    d.  此处的例子为： diffuse 颜色 和 reflection 颜色做线性 lerp 。  
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/10-2.png)  
+
+
+**b. 折射**   （当前简单折射）   
+现实中的折射通常发生两次/多次，一般图形学模拟都是一次，看起来是对的（实时渲染领域）
+(如皮肤的次表面散射，BSSRDF)
+
+简单例子：反射定律。(refract 函数)
+
+    worldRefractDir = refract(-normalize( o.worldViewDir ) ,normalize(o.worldNormal),_RefractionRatio);
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/10-3.png) 
+
+此处的例子为： 反射方向做一个偏移，然后从cubemap或其他环境光容器中取值 做lerp 
+
+**c.菲涅耳现象**
+（如现实世界中的菲涅耳曲线）  
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/10-4.png) 
+
+
+
+两个模拟曲线的方程  
+
+    1.Schlick 著名公式:(两个参数) F0 + (1-F0)(1-dot(v,n))^5
+    2.Empricial (三个控制参数，广泛公式) max( 0, min(1,bias + scale * pow( (1-dot(v,n)), power) ) )
+
+
+在本书反射的例子里： 反射是diffuse,reflection的线性lerp  
+**而菲涅耳现象的这里用例 相当于自动lerp。** 
+
+    反射混合： 
+        fixed3 color = ambient + ( lerp(diffuse, reflection , _ReflectAmont) + specular) * atten;
+    菲涅耳混合：
+        fixed3 fresnel = _FresnelScale + (1- _FresnelScale) * pow(1-dot( worldViewDir, normalDir ),5);
+        fixed3 color = ambient + lerp(diffuse,reflection, saturate(fresnel));
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/10-5.png) 
+
+
+书上还写了一个：菲涅耳 和 反射光相乘，叠加到漫反射上，可以模拟边缘光照
+
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/10-6.png) 
+
+#### 2 ：渲染纹理（RenderTexture RT） (Command buffer) 
+(即现代GPU允许将渲染内容，临时放在一个缓存里，允许CPU 去操作 如 Defferd GBuffer )   
+个人理解：GPU和CPU的一种桥梁，如渲染一半临时存起来，然后在输入设置参数，GPU在读取缓存，然后draw
+
+Unity专门定义了一种图片格式：render texture  
+
+Unity中两种方式RT  
+1. 静态绑定： 摄像机直接生成renderTexture,可以设置各种属性。
+    
+        第一种示例，在shader里面采样render texture 制作镜像效果。
+        静态绑定好 场景，相机设置成Render Texture 模式
+
+        (镜像，即水平翻转，水平翻转的特点是y不变，x=1-x)
+        思想：在shader中采样贴图的值，翻转x值 ，直接显示出来
+        如下计算 o.uv 的值：
+        o.uv.x = 1 - o.uv.x;
+
+        给mesh的material 赋值该shader，该shader 采样该render texture
+    
+
+2. 动态生成 :
+
+        a.shader 中通过GrabPass 命令（无法控制大小，和屏幕大小一样， 注意抓取顺序）
+    
+        一种带字符串，一种不带字符串 ，可以pass 内部共用，
+        带字符串只会抓取一次，不带每次都会抓取 ,properties 中的属性设置
+        Queue 最好是保证所有不透明物体都已经渲染完了 在去抓取屏幕
+    
+        b. cpu端 c# OnRendeImage（后处理相关）函数生成的 Render Texture。
+动态grab pass 正常会打断GPU的并行Job ，性能需要考虑  
+
+有点丑的毛玻璃效果，Grab pass  
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/10-7.png) 
+    
+
+
+Command Buffers 扩展流水线  
+Unity 5, we settled on ability to create "list of things to do" buffers, which we dubbed "Command Buffers".
+
+（本质是camera 和 light 在渲染阶段暴露出来了一些阶段事件）
+
+(draw call( DrawIndexedPrimitive )也是一种command )  
+https://docs.unity3d.com/Manual/GraphicsCommandBuffers.html 
+
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/10-8.png)
+
+detail and source code 
+
+https://blog.unity.com/technology/extending-unity-5-rendering-pipeline-command-buffers
+
+
+
+#### 3 ：程序纹理（Texture2D) (Substance Designer  包括U1的好多HDR贴图) 
+（无非就是程序可控性参数强一些，批量化资源）
+
+整体比较简单:如下
+
+    texture =  new Texture2D()   
+    texture.SetPixel(x,y ,pixel)  
+    texture.apply()  
+    material.setTexture("xxx",texture)
+
+现在3A标配 ：Substance Designer （hodini）  
+
+
+Substance Designer 简单教程  
+https://zhuanlan.zhihu.com/p/99362830
+
+一个视频教程  
+https://assetstore.unity.com/packages/tools/utilities/substance-in-unity-110555
