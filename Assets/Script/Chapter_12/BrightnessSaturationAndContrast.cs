@@ -30,9 +30,9 @@ public class BrightnessSaturationAndContrast : PostEffectsBase
     {
         if (material != null)
         {
-            material.SetFloat("_brightness", brightness);
-            material.SetFloat("_saturation", saturation);
-            material.SetFloat("_contrast", contrast);
+            material.SetFloat("_Brightness", brightness);
+            material.SetFloat("_Saturation", saturation);
+            material.SetFloat("_Constrast", contrast);
 
             Graphics.Blit(src,dst,material);
         }

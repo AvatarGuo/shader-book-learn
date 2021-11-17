@@ -299,13 +299,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_GeneratorAsset: {fileID: 0}
-  m_Script: {fileID: 11500000, guid: c28c49317c2dc43bead7a1a11883ae55, type: 3}
+  m_Script: {fileID: 11500000, guid: 7dcc7351c55dbe2469c0e165ef917b35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  briSatConShader: {fileID: 4800000, guid: a8bb1cedc6dbe4cce89478c01bd6d378, type: 3}
-  brightness: 1.2
-  saturation: 1.6
-  contrast: 1.2
+  BrightSatConShader: {fileID: 4800000, guid: 0b450db24de7f6c43a84f45fa701f345, type: 3}
+  brightness: 1.205
+  saturation: 2.029
+  contrast: 2.255
 --- !u!1 &2065571803
 GameObject:
   m_ObjectHideFlags: 0
@@ -368,7 +368,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &2065571805
