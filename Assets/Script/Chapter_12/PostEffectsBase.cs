@@ -19,11 +19,11 @@ public class PostEffectsBase : MonoBehaviour
     protected bool checkSupport()
     {
         
-        if (!SystemInfo.supportsImageEffects || !SystemInfo.supportsRenderTextures)
-        {
-            Debug.LogWarning("this platform not support image effects!");
-            return false;
-        }
+        // if (!SystemInfo.supportsImageEffects || !SystemInfo.supportsRenderTextures)
+        // {
+        //     Debug.LogWarning("this platform not support image effects!");
+        //     return false;
+        // }
 
         return true;
     }

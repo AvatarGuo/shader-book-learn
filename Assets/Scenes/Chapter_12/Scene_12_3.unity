@@ -257,7 +257,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 59.1
+  field of view: 60
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -299,13 +299,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_GeneratorAsset: {fileID: 0}
-  m_Script: {fileID: 11500000, guid: 7dcc7351c55dbe2469c0e165ef917b35, type: 3}
+  m_Script: {fileID: 11500000, guid: c66b8267d05c23f45a4f752f29e99256, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BrightSatConShader: {fileID: 4800000, guid: 0b450db24de7f6c43a84f45fa701f345, type: 3}
-  brightness: 0.964
-  saturation: 2.411
-  contrast: 2.013
+  edageDetectShader: {fileID: 4800000, guid: 2cc581e96d6891c4cb7663c884cfc55a, type: 3}
+  edgesOnly: 0.346
+  edgeColor: {r: 0, g: 0, b: 0, a: 1}
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &2065571803
 GameObject:
   m_ObjectHideFlags: 0
