@@ -65,13 +65,14 @@
                 //需要scale的话 也可以直接使用Transp
                 
                 //注意下面的每一个都是二维的
+                      //定义一个卷积核
                 half2 uv = v.uv;
 
                 o.uv[0] = uv + _MainTex_TexelSize.xy * half2(-1,-1);
                 o.uv[1] = uv + _MainTex_TexelSize.xy * half2(0,-1);
                 o.uv[2] = uv + _MainTex_TexelSize.xy * half2(1,-1);
 
-                //定义一个卷积核
+          
                 o.uv[3] = uv + _MainTex_TexelSize.xy * half2(-1 , 0);
                 o.uv[4] = uv + _MainTex_TexelSize.xy * half2( 0 , 0);
                 o.uv[5] = uv + _MainTex_TexelSize.xy * half2( 1 , 0);
