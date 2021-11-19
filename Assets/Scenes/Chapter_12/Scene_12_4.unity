@@ -279,7 +279,6 @@ GameObject:
   - component: {fileID: 1838242755}
   - component: {fileID: 1838242754}
   - component: {fileID: 1838242753}
-  - component: {fileID: 1838242759}
   - component: {fileID: 1838242758}
   m_Layer: 0
   m_Name: Main Camera
@@ -379,27 +378,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_GeneratorAsset: {fileID: 0}
-  m_Script: {fileID: 11500000, guid: c54e23f3da2cf4fd8a94f8a145eebfeb, type: 3}
+  m_Script: {fileID: 11500000, guid: 0b556f2752f89a1439c23e63db3b96ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gaussianBlurShader: {fileID: 4800000, guid: 68daeb256e94e47169269e893518f875, type: 3}
-  iterations: 2
-  blurSpread: 1
-  downSample: 2
---- !u!114 &1838242759
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1838242752}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_GeneratorAsset: {fileID: 0}
-  m_Script: {fileID: 11500000, guid: c28c49317c2dc43bead7a1a11883ae55, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  briSatConShader: {fileID: 4800000, guid: a8bb1cedc6dbe4cce89478c01bd6d378, type: 3}
-  brightness: 1.2
-  saturation: 1.4
-  contrast: 1.2
+  GaussusianShader: {fileID: 4800000, guid: fa4fde7eb380fa149963cdf3a14b95be, type: 3}
+  iterations: 4
+  blurSpeed: 1.141
+  downSample: 1
