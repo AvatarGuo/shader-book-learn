@@ -382,6 +382,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GaussusianShader: {fileID: 4800000, guid: fa4fde7eb380fa149963cdf3a14b95be, type: 3}
-  iterations: 4
-  blurSpeed: 1.141
-  downSample: 1
+  iterations: 0
+  blurSpeed: 0.2
+  downSample: 2

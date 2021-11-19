@@ -94,8 +94,11 @@ public class GlaussianBlur : PostEffectsBase
         var mat = material;
         if (mat)
         {
-            int rtW = src.width;
-            int rtH = src.height;
+
+            int rtW = src.width / downSample;
+            int rtH = src.height / downSample;
+            // int rtW = src.width;
+            // int rtH = src.height;
 
             
             RenderTexture buffer0 = RenderTexture.GetTemporary(rtW,rtH,0);
