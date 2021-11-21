@@ -1,4 +1,4 @@
-﻿Shader "Unlit/GaussionShader"
+﻿Shader "Unity Shader book/Chapter12/GaussionShader"
 {
     Properties
     {

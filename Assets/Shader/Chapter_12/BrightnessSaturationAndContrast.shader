@@ -2,7 +2,7 @@
 {
     Properties
     {
-        
+        //后处理中 默认为src传过来的。
         _MainTex ("Texture", 2D) = "white" {}
         
         //注意后处理实际是可以省略声明的，声明仅仅是材质球方便设置

@@ -1,4 +1,4 @@
-﻿Shader "Unlit/EdgeDetection"
+﻿Shader "Unity Shader book/Chapter12/EdgeDetection"
 {
     Properties
     {
@@ -133,9 +133,10 @@
                 fixed4 oriColor = tex2D(_MainTex,i.uv[4]);
 
                 fixed4 withEdgeColor = lerp(_EdgeColor ,oriColor ,edge);
-                fixed4 onlyEdgeColor = lerp(_EdgeColor,_BackgroundColor,edge);
+                //fixed4 onlyEdgeColor = lerp(_EdgeColor,_BackgroundColor,edge);
 
-                return lerp(withEdgeColor , onlyEdgeColor ,_EdgeOnly);
+                //return lerp(withEdgeColor , onlyEdgeColor ,_EdgeOnly);
+                return withEdgeColor;
             }
             ENDCG
         }
