@@ -74,16 +74,13 @@
 
 
 		//混合局部亮度和原图片
-//		struct v2fBloom
-//		{
-//			float4 pos:SV_POSITION;
-//			float4 uv;TEXCOORD0;
-//		};
-
-		struct v2fBloom {
-			float4 pos : SV_POSITION; 
-			half4 uv : TEXCOORD0;
+		struct v2fBloom
+		{
+			float4 pos:SV_POSITION;
+			half4 uv:TEXCOORD0;
 		};
+
+
 
 		v2fBloom vertBloom(appdata_img v){
 			v2fBloom  o;
