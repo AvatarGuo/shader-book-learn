@@ -857,3 +857,161 @@ ps 另外当前几个矩阵挺有意思的：
 
 ![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/11-3.png)
 
+
+## 第十二章：屏幕后处理技术
+(本质：一个覆盖全屏幕的面片，给这个面片赋值material(shader),然后render it)  
+https://github.com/QianMo/X-PostProcessing-Library  （毛星云的一个炫酷的库）  
+
+1. 默认是在透明和不透明渲染之后渲染RT src (ImageEffectOpaque属性可设置渲染顺序)  
+https://docs.unity3d.com/ScriptReference/ImageEffectOpaque.html  
+2. _MainTex 使用 RT src渲染出来的结果
+3. MonoBehavior.OnRenderImage(src,dst)  
+4. Graphic.Blit(src,renderTexture dst ,material ,pass)   
+  (pass 默认-1，表示会执行所有pass)
+
+#### 1 简单的概括 
+官网最新的三种后处理Pipeline :  
+https://docs.unity3d.com/Manual/PostProcessingOverview.html  
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-1.png)  
+
+核心API:  
+
+    [RequireComponent(typeof(Camera))]  
+    MonoBehavior.OnRenderImage( scr , dst )  
+    material = new Material(shader); //_MainTex 默认为src
+    material.setXXX("_XXX",XXX)  
+    Graphic.blit(src,dst,material,Pass)
+
+注意：  
+
+    1. 可以省略shader中 Properties 变量的定义（只是inspector 界面看不到，shader中还可以照常定义使用）。  
+    2. src 纹理会传给shader中 _MainTex 的纹理属性。
+    3. pass 默认-1 会执行所有pass,否则只渲染指定pass (如高斯模糊等效果可以自定义渲染指定pass) 
+    4. ImageEffectOpaque  
+    5. shader中固定的ZTest Always ,ZWrite Off  Cull off
+
+#### 2. 代码调整亮度示例
+ 调整屏幕亮度(代码公式和HDR颜色空间的亮度公式 )
+
+    fixed luminance = 0.2125 * renderTex.r + 0.7154 * renderTex.g + 0.0721 * renderTex.b;    
+
+如下蚊香的KM的HDR文章中 "色彩坐标空间变换" 关于亮度的说明
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-2.png)     
+
+（冯乐乐的HDR系列也能找到:https://zhuanlan.zhihu.com/p/129095380）  
+
+
+  
+    1. TRANSFORM_TEX 使用不使用都可以(即需不需要缩放(xxx_ST) 控制)。    
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-3.png)     
+    
+    2. shader 中 Properties 中的声明可以去掉  （仅仅material面板显示调整参数）  
+    3. ZTest Always ,ZWrite Off  Cull off ,因为可以在c#端设置后处理Scr生成顺序，所以ZWrite off ，等固定参数
+
+
+
+#### 3.边缘检测（卷积，求平均的思想）（half2 XXX_PixelSize:当前texture的像素点)
+**目的：主要是边缘找出线，给线加个颜色**
+可以根据情况做更多的图片原色混合。
+
+梯度：数学上如从等高线来分析即下降最快的方向（即垂直方向）(103-第3讲思想蛮不错的)  
+这里用的例子是：Sobel Gx,Gy 求两次卷积
+
+卷积核心是求当前贴图采样点周围卷积核 **范围内的贴图，取出其像素**，求**平均**。
+
+所以unity中的几个注意点吧：  
+    
+    0.  XXX_ST 控制的是缩放。
+        XXX_TexelSize 是当前的纹素点
+        (两者都要定义才能使用！否则会报错)
+
+    1. XXX_TexelSize 获取指定范围内若干个像素点的方法（需要定义下TexelSize）
+        a. 当前像素点:          uv + _MainTex_TexelSize.xy  *  half2( 0 , 0);  
+        b. 周围(-1,-1) 像素点： uv + _MainTex_TexelSize.xy  *  half2(-1,-1);
+        c. 求周围以此类推
+
+        d. 如图片大小是512x512的话，对应的XXX_TexelSize  就是 1/512,1/512 （0.001953）
+        
+    2. struct v2f 中的 half2 uv[9] : TEXCOORD0 ;  //shander中定义了一个half2 数组方法。
+
+
+uv[9]的定义 和 计算图片周围像素的方法  
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-4.png)      
+
+其他计算就是一些lerp的插值，工程的方法了  
+
+    half edge = sobel(i); //求出卷积核的平均值
+    fixed4 oriColor = tex2D(_MainTex,i.uv[4]); //采样原始贴图
+    
+    fixed4 withEdgeColor = lerp( _EdgeColor , oriColor , edge); //边缘沟边（一般边缘检测的目的是边缘加一圈线）
+    fixed4 onlyEdgeColor = lerp( _EdgeColor , _BackgroundColor,edge); //如果想实现显示沟边，可以加个和背景色混合  
+    
+    return lerp(withEdgeColor , onlyEdgeColor ,_EdgeOnly); //和背景做lerp
+
+
+如下图：如果想去掉背景色（图片原来的颜色） ，可以在做个混合。
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-5.png)       
+
+
+
+**若只做边缘色混合**  
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-6.png)     
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-7.png)         
+
+
+一些实际工程效果可以根据情况来弄
+
+
+#### 4.高斯模糊（双pass， N*N -> N+N ）（DownSamle）(CGINCLUDE) (USEPASS )
+ 双pass 时间复杂度 是N*N ，水平一遍pass->存起来->竖直一遍pass  复杂度 n+n   
+（**核心是操作一个buffer，对buffer进行操作，降低复杂度**）
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-8-0.png)       
+
+
+ a. 双pass 高斯模糊叠加起来
+
+    //down sample 例子
+    int rtW = src.width / downSample; 
+    int rtH = src.height / downSample;
+
+    RenderTexture buffer = RenderTexture.GetTemporary(rtW,rtH,0); //
+    buffer.filterMode = FilterMode.Bilinear
+
+    Graphic.blit(src,buffer,mat ,0) //执行pass 0
+    Graphic.blit(buffer,dst,mat ,1) //执行pass 1
+
+    RenderTexture.repleaseTempory(buffer) //释放buffer
+
+
+
+b.  pass name ,use pass 
+
+    pass
+    {
+        Name "GAUSSIAN_BLUR_VERTICAL"
+
+        CGPROGRAM
+        #pragma vertex vertexBlurVertical
+        #pragma fragment fragBlur
+        ENDCG
+    }
+
+可以直接使用pass,根据所处的pass 定义位置，决定其 **pass index**
+
+    UsePass "Unity Shader book/Chapter12/GaussionShader/GAUSSIAN_BLUR_VERTICAL"
+
+c. CGINCLUDE 定义和使用
+
+    CGINCLUDE  
+        xxx
+    ENDCG  
+
+
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-8.png)       
+
+
+
+
+
