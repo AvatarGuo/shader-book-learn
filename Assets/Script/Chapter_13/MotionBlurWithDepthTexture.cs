@@ -80,5 +80,8 @@ public class MotionBlurWithDepthTexture : PostEffectsBase
     void OnEnable()
     {
         camera.depthTextureMode |= DepthTextureMode.Depth;
+
+        //还是要考虑第一帧
+        _preWorld2ProjectMatrix = camera.projectionMatrix * camera.worldToCameraMatrix;
     }
 }
