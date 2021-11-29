@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using NUnit.Framework;
 using UnityEngine;
 
 public class MotionBlurWithDepthTexture : PostEffectsBase
@@ -35,7 +34,7 @@ public class MotionBlurWithDepthTexture : PostEffectsBase
             if (_camera == null)
             {
                 _camera = this.gameObject.GetComponent<Camera>();
-                Assert.IsTrue(_camera != null, string.Format("[MotionBlurWithDepthTexture] this object : {0} not have camera ", this.gameObject.name));
+                // Assert.IsTrue(_camera != null, string.Format("[MotionBlurWithDepthTexture] this object : {0} not have camera ", this.gameObject.name));
             }
             return _camera;
         }

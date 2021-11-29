@@ -108,6 +108,7 @@
                 tangentNormal.z         = sqrt( 1.0 -  saturate ( dot (tangentNormal.xy , tangentNormal.xy  ) )) ;
 
 
+                //存储到切线空间中可压缩
                 fixed3 worldNormal = normalize( fixed3( dot(i.T2W0.xyz,tangentNormal) , dot(i.T2W1.xyz , tangentNormal ),dot(i.T2W2.xyz ,tangentNormal)) );
                 fixed3 worldPos = fixed3(i.T2W0.z , i.T2W1.z , i.T2W2.z  );
 

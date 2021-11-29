@@ -11,7 +11,7 @@
 		CGINCLUDE
 
 		#include "UnityCG.cginc"
-		#include "HLSLSupport.cginc"
+		//#include "HLSLSupport.cginc"
 
 		sampler2D _MainTex; //获取图片纹素，即当前的x,y信息
 		float2 _MainTex_TexelSize;  //x，y 就能表示了,zw 存储的是啥
@@ -52,12 +52,13 @@
 		{
 
 			//图片原始的x,y已经知道了，现在要获得深度值，但是深度值被压缩了，所以深度要变成线性深度值
-			float d = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture , i.uv.uv_depth);
+			float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture , i.uv_depth);
 			//ndc空间本身z值就是非线性的
-			float4 projection_info =  float4(i.uv.x*2 - 1 ,u.uv.y *2 -1 , d * 2 - 1 , 1.0 ); //都已经被限制到-1，1了，所以直接w取1
+			//所以这里没做线性变换
+			float4 projection_info =  float4(i.uv.x * 2 - 1 ,i.uv.y * 2 -1 , depth * 2 - 1 , 1.0 ); //都已经被限制到-1，1了，所以直接w取1
 
-			float4 d 	= mul( _CurProjectToWorldMatrix, projection_info);
-			float4 worldPos = d/d.w; //获取世界坐标
+			float4 worldPos = mul( _CurProjectToWorldMatrix , projection_info);
+			worldPos = worldPos/worldPos.w; //获取世界坐标
 
 			//
 			float4 curPos = projection_info;
