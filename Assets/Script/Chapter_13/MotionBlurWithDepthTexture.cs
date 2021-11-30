@@ -5,7 +5,7 @@ using UnityEngine;
 public class MotionBlurWithDepthTexture : PostEffectsBase
 {
 
-    private Material _material;
+    public Material _material;
     public Shader motionBlurDepthShader;
     public Material material
     {
@@ -13,7 +13,6 @@ public class MotionBlurWithDepthTexture : PostEffectsBase
         {
             if (_material == null)
             {
-
                 _material = CheckShaderAndCreateMaterial( motionBlurDepthShader , _material );
             }
             return _material;
@@ -46,7 +45,8 @@ public class MotionBlurWithDepthTexture : PostEffectsBase
     /// </summary>
     private Matrix4x4 _preWorld2ProjectMatrix;
 
-    void OnRenderTexture(RenderTexture src ,RenderTexture dst)
+    //写错了效果
+    void OnRenderImage(RenderTexture src ,RenderTexture dst)
     {
 
         //现在的前提是只有当前帧的位置信息（x,y 即 uv. z 即 SAMPLE_DEPTH_TEXTURE 在shader中采样 ）
@@ -65,7 +65,6 @@ public class MotionBlurWithDepthTexture : PostEffectsBase
 
             _preWorld2ProjectMatrix = _curWorld2ProjectMatrix;
             //世界坐标的点 转到ndc坐标中
-            //
 
             //指定的index
             Graphics.Blit(src,dst,material);
@@ -83,5 +82,7 @@ public class MotionBlurWithDepthTexture : PostEffectsBase
 
         //还是要考虑第一帧
         _preWorld2ProjectMatrix = camera.projectionMatrix * camera.worldToCameraMatrix;
+
+
     }
 }

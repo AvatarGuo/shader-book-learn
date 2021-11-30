@@ -14,7 +14,7 @@
 		//#include "HLSLSupport.cginc"
 
 		sampler2D _MainTex; //获取图片纹素，即当前的x,y信息
-		float2 _MainTex_TexelSize;  //x，y 就能表示了,zw 存储的是啥
+		half4 _MainTex_TexelSize;  //x，y 就能表示了,zw 存储的是啥
 
 		float _BlurSize;  //模糊程度
 		float4x4 _PreWorlldToProjectMatrix;
@@ -41,14 +41,17 @@
 			o.uv_depth = v.texcoord;
 
 			#if UNITY_UV_STARTS_AT_TOP
-				o.uv_depth.y = 1.0 - o.uv.y;
+				if (_MainTex_TexelSize.y < 0){
+					o.uv_depth.y = 1.0 - o.uv.y;
+		
+				}
 			#endif
 
 			return o;
 		};
 
 		
-		fixed frag(v2f i):SV_Target
+		fixed4 frag(v2f i):SV_Target
 		{
 
 			//图片原始的x,y已经知道了，现在要获得深度值，但是深度值被压缩了，所以深度要变成线性深度值
@@ -64,7 +67,7 @@
 			float4 curPos = projection_info;
 			//上一步骤获得的世界坐标，获取上一个世界坐标
 			float4 prePos = mul(_PreWorlldToProjectMatrix,worldPos );
-			prePos = prePos/prePos.w;
+			prePos = prePos/prePos.w; //获取ndc坐标
 
 
 			//计算下速度
