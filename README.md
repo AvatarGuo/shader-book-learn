@@ -1012,6 +1012,8 @@ c. CGINCLUDE 定义和使用
 ![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-8.png)       
 
 
+
+
 #### 5. Bloom效果（第一次把buffer作为texture的属性传给shader）
 **bloom 本质（和hdr的区分）：（buffer 混合注意原点是左上角还是右下角需要考虑）**
 
@@ -1042,6 +1044,13 @@ Bloom横竖两遍提取出高亮部分，模糊，混合。
 
 补充一个项目内部的使用
 ![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-9.png)       
+
+
+执行开发用到的一个优化流程
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-9-1.png)       
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-9-2.png)       
+
+
 
 #### 6.运动模糊1.0（比较简单的方法，即RenderTexture.MarkRestoreExpected）
 核心API： RenderTexture.MarkRestoreExpected 
