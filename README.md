@@ -1041,7 +1041,7 @@ Bloom横竖两遍提取出高亮部分，模糊，混合。
 **UsePass 中的 pass 名字必须是大写，因为底层会把所有pass名称都转为大写的。**
 
 补充一个项目内部的使用
-![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/chapter12-9.png)       
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-9.png)       
 
 #### 6.运动模糊1.0（比较简单的方法，即RenderTexture.MarkRestoreExpected）
 核心API： RenderTexture.MarkRestoreExpected 
@@ -1049,7 +1049,7 @@ Bloom横竖两遍提取出高亮部分，模糊，混合。
 (重置过期，即贴图不会重置就不会清除原本的rt了)
   
 （即如API所述，累计缓存，不清除即可，但是有消耗）
-![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/chapter12-10.png)       
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-10.png)       
 
 
 
