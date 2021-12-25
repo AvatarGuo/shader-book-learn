@@ -1012,6 +1012,44 @@ c. CGINCLUDE 定义和使用
 ![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-8.png)       
 
 
+#### 5. Bloom效果（第一次把buffer作为texture的属性传给shader）
+**bloom 本质（和hdr的区分）：（buffer 混合注意原点是左上角还是右下角需要考虑）**
+
+    1.提取亮度部分 生成buffer图片
+    2.将buffer图片做模糊或者缩放和已有图片做混合（图片原点左上角或者右下角问题）
+
+高斯模糊是横竖两遍对全图做模糊，
+Bloom横竖两遍提取出高亮部分，模糊，混合。
+
+核心API clamp：https://developer.download.nvidia.cn/cg/clamp.html
+    
+    saturate  ：限制到0-1范围内 ,clamp限制到a-b范围内
+    clamp (float4 ,float4 min,float4 max)/clamp (float4 ,float min,float max) ，如 clamp(x,0,1)限制到0,1范围内
+
+
+具体执行步骤为：
+
+    1.生成一张图片，干掉某个部分，（简单粗暴可以用alpha test的 clip函数）  这里用的是clamp函数
+    2.shader中提取一部分高于指定亮度的部分，做一个高斯模糊
+        a：提取出来亮度超过某个值的
+            两张贴图混合，需要考虑DX/OpenGL 左上角右下角 的处理
+            程序动态生产的贴图需要考虑。
+        b. 前1步骤生成的图片(rt里面放在一个buffer里面)，做一遍高斯模糊
+            （水平pass, 竖直pass）
+        c. 融合前两步的pass 
+
+**UsePass 中的 pass 名字必须是大写，因为底层会把所有pass名称都转为大写的。**
+
+补充一个项目内部的使用
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/chapter12-9.png)       
+
+#### 6.运动模糊1.0（比较简单的方法，即RenderTexture.MarkRestoreExpected）
+核心API： RenderTexture.MarkRestoreExpected 
+
+(重置过期，即贴图不会重置就不会清除原本的rt了)
+  
+（即如API所述，累计缓存，不清除即可，但是有消耗）
+![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/chapter12-10.png)       
 
 
 
