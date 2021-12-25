@@ -1046,9 +1046,12 @@ Bloom横竖两遍提取出高亮部分，模糊，混合。
 ![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-9.png)       
 
 
-执行开发用到的一个优化流程
+之前开发流程用到的bloom流程
 ![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-9-1.png)       
 ![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/12-9-2.png)       
+
+
+https://zhuanlan.zhihu.com/p/125744132 GDC 2003的一个关于bloom的分享，实现某种Bloom
 
 
 
