@@ -30,7 +30,6 @@ c.三角形重心坐标，即模型的三个顶点覆盖的那个像素，通过
 ![alt text](https://github.com/AvatarGuo/shader-book-learn/blob/main/pictures/4-0-2.png)
  
  
- <br/>
 ## 第五章(基础shader篇)
 <br/>
 subshader 类似 direct X 中的 techniques 一样，在多pass种找到最合适的那一个。  
