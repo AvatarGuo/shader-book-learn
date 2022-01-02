@@ -774,6 +774,7 @@ GameObject:
   - component: {fileID: 1838242753}
   - component: {fileID: 1838242760}
   - component: {fileID: 1838242758}
+  - component: {fileID: 1838242759}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -875,8 +876,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91b83a6ce5bcf404890151e4e5a47132, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _material: {fileID: 0}
   motionBlurDepthShader: {fileID: 4800000, guid: e48a64f7889542c40a2cda15bd5d232e,
     type: 3}
+  blurSize: 0.5
+--- !u!114 &1838242759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1838242752}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_GeneratorAsset: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: db7e45ba438375c478df1dcb00c0ce4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  motionBlurShader: {fileID: 4800000, guid: d5602504ab65e02458d76ba9259628d8, type: 3}
+  motionBlurMaterial: {fileID: 1947956028}
   blurSize: 0.5
 --- !u!114 &1838242760
 MonoBehaviour:
@@ -1002,6 +1020,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 50
+--- !u!21 &1947956028
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Unity Shaders Book/Chapter 13/Motion Blur With Depth Texture
+  m_Shader: {fileID: 4800000, guid: d5602504ab65e02458d76ba9259628d8, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _BlurSize: 0.5
+    m_Colors: []
 --- !u!1 &2113428393
 GameObject:
   m_ObjectHideFlags: 0

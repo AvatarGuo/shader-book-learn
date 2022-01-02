@@ -384,4 +384,4 @@ MonoBehaviour:
   GaussusianShader: {fileID: 4800000, guid: fa4fde7eb380fa149963cdf3a14b95be, type: 3}
   iterations: 0
   blurSpeed: 0.2
-  downSample: 2
+  downSample: 5

@@ -43,7 +43,6 @@
 			#if UNITY_UV_STARTS_AT_TOP
 				if (_MainTex_TexelSize.y < 0){
 					o.uv_depth.y = 1.0 - o.uv.y;
-		
 				}
 			#endif
 
